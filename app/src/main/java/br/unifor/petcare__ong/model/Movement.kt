@@ -11,13 +11,9 @@ data class Movement(
     @set:PropertyName("tipo")
     var type: String = "",
 
-    @get:PropertyName("data")
-    @set:PropertyName("data")
-    var date: String = "",
-
-    @get:PropertyName("horaInicio")
-    @set:PropertyName("horaInicio")
-    var startTime: String = "",
+    @get:PropertyName("dataHoraInicio")
+    @set:PropertyName("dataHoraInicio")
+    var startDateTime: String = "",
 
     @get:PropertyName("status")
     @set:PropertyName("status")
@@ -29,7 +25,7 @@ data class Movement(
 
     @get:PropertyName("dataHoraFim")
     @set:PropertyName("dataHoraFim")
-    var endTime: String = "",
+    var endDateTime: String = "",
 
     @get:PropertyName("anotacoes")
     @set:PropertyName("anotacoes")

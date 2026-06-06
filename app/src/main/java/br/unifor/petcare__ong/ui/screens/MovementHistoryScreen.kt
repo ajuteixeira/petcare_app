@@ -233,11 +233,20 @@ fun MovementItemCard(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "${movement.date} • ${movement.startTime}",
+                text = movement.startDateTime,
                 fontSize = 12.sp,
                 color = Color.LightGray,
                 fontWeight = FontWeight.Medium
             )
+
+            if (movement.endDateTime.isNotEmpty()) {
+                Text(
+                    text = "Fim: ${movement.endDateTime}",
+                    fontSize = 12.sp,
+                    color = Color.LightGray,
+                    fontWeight = FontWeight.Medium
+                )
+            }
 
             Spacer(modifier = Modifier.height(12.dp))
 
