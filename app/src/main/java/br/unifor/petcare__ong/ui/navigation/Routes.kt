@@ -25,9 +25,17 @@ sealed class Routes(val route: String) {
 
     object NewRecord : Routes("new_record")
 
-    object MovementHistory : Routes("movement_history")
+    object MovementHistory : Routes("movement_history/{animalId}") {
+        fun createRoute(animalId: String) = "movement_history/$animalId"
+    }
 
-    object NewMovement : Routes("new_movement")
+    object NewMovement : Routes("new_movement/{animalId}") {
+        fun createRoute(animalId: String) = "new_movement/$animalId"
+    }
+
+    object EditMovement : Routes("edit_movement/{animalId}/{movementId}") {
+        fun createRoute(animalId: String, movementId: String) = "edit_movement/$animalId/$movementId"
+    }
 
     object ExportReports : Routes("export_reports")
 }

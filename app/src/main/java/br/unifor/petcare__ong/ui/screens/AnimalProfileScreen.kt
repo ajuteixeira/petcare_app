@@ -256,7 +256,7 @@ fun AnimalProfileScreen(navController: NavController, animalId: String) {
                         icon = Icons.Default.Map,
                         containerColor = tealPrimary,
                         onClick = {
-                            navController.navigate(Routes.MovementHistory.route)
+                            navController.navigate(Routes.MovementHistory.createRoute(animalId))
                         }
                     )
                 }

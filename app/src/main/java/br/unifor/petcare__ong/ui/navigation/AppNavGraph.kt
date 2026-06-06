@@ -55,12 +55,20 @@ fun AppNavGraph() {
             NewRecordScreen(navController)
         }
 
-        composable(Routes.MovementHistory.route) {
-            MovementHistoryScreen(navController)
+        composable(Routes.MovementHistory.route) { backStackEntry ->
+            val animalId = backStackEntry.arguments?.getString("animalId") ?: ""
+            MovementHistoryScreen(navController, animalId)
         }
 
-        composable(Routes.NewMovement.route) {
-            NewMovementScreen(navController)
+        composable(Routes.NewMovement.route) { backStackEntry ->
+            val animalId = backStackEntry.arguments?.getString("animalId") ?: ""
+            NewMovementScreen(navController, animalId)
+        }
+
+        composable(Routes.EditMovement.route) { backStackEntry ->
+            val animalId = backStackEntry.arguments?.getString("animalId") ?: ""
+            val movementId = backStackEntry.arguments?.getString("movementId") ?: ""
+            NewMovementScreen(navController, animalId, movementId)
         }
 
         composable(Routes.ExportReports.route) {

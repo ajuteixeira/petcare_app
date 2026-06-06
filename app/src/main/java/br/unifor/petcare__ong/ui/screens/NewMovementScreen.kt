@@ -1,6 +1,8 @@
 package br.unifor.petcare__ong.ui.screens
 
-import androidx.compose.foundation.background
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -10,32 +12,111 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import br.unifor.petcare__ong.ui.components.AppBottomBar
-import br.unifor.petcare__ong.ui.navigation.Routes
+import br.unifor.petcare__ong.model.Movement
+import br.unifor.petcare__ong.ui.viewmodel.MovementViewModel
+import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NewMovementScreen(navController: NavController) {
+fun NewMovementScreen(
+    navController: NavController,
+    animalId: String,
+    movementId: String? = null,
+    viewModel: MovementViewModel = viewModel()
+) {
+    val context = LocalContext.current
+    val calendar = Calendar.getInstance()
+
     val darkBlue = Color(0xFF0D1B3E)
     val tealPrimary = Color(0xFF009688)
     val backgroundGray = Color(0xFFF8F9FA)
-    val inputBorderColor = Color(0xFFEEEEEE)
-    val placeholderColor = Color(0xFFB0B0B0)
+
+    var type by remember { mutableStateOf("") }
+    var date by remember { mutableStateOf("") }
+    var startTime by remember { mutableStateOf("") }
+    var status by remember { mutableStateOf("Agendado") }
+    var responsible by remember { mutableStateOf("") }
+    var endTime by remember { mutableStateOf("") }
+    var notes by remember { mutableStateOf("") }
+
+    LaunchedEffect(movementId) {
+        if (!movementId.isNullOrEmpty()) {
+            viewModel.fetchMovementById(animalId, movementId) { movement ->
+                movement?.let {
+                    type = it.type
+                    date = it.date
+                    startTime = it.startTime
+                    status = it.status
+                    responsible = it.responsible
+                    endTime = it.endTime
+                    notes = it.notes
+                }
+            }
+        }
+    }
+
+    var typeExpanded by remember { mutableStateOf(false) }
+    val typeOptions = listOf("Evento de adoção", "Cirurgia", "Consulta", "Passeio", "Lar temporário", "Outro")
+
+    var statusExpanded by remember { mutableStateOf(false) }
+    val statusOptions = listOf("Agendado", "Em progresso", "Concluído")
+
+    // Date Picker for 'date'
+    val datePickerDialog = DatePickerDialog(
+        context,
+        { _, year, month, dayOfMonth ->
+            date = String.format("%02d/%02d/%04d", dayOfMonth, month + 1, year)
+        },
+        calendar.get(Calendar.YEAR),
+        calendar.get(Calendar.MONTH),
+        calendar.get(Calendar.DAY_OF_MONTH)
+    )
+
+    // Time Picker for 'startTime'
+    val startTimePickerDialog = TimePickerDialog(
+        context,
+        { _, hour, minute ->
+            startTime = String.format("%02d:%02d", hour, minute)
+        },
+        calendar.get(Calendar.HOUR_OF_DAY),
+        calendar.get(Calendar.MINUTE),
+        true
+    )
+
+    // Date and Time Picker for 'endTime'
+    val endDateTimePickerDialog = DatePickerDialog(
+        context,
+        { _, year, month, dayOfMonth ->
+            val selectedDate = String.format("%02d/%02d/%04d", dayOfMonth, month + 1, year)
+            TimePickerDialog(
+                context,
+                { _, hour, minute ->
+                    endTime = "$selectedDate " + String.format("%02d:%02d", hour, minute)
+                },
+                calendar.get(Calendar.HOUR_OF_DAY),
+                calendar.get(Calendar.MINUTE),
+                true
+            ).show()
+        },
+        calendar.get(Calendar.YEAR),
+        calendar.get(Calendar.MONTH),
+        calendar.get(Calendar.DAY_OF_MONTH)
+    )
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        text = "Nova Movimentação",
+                        text = if (movementId.isNullOrEmpty()) "Nova Movimentação" else "Editar Movimentação",
                         fontWeight = FontWeight.Bold,
                         color = darkBlue,
                         fontSize = 18.sp
@@ -74,60 +155,169 @@ fun NewMovementScreen(navController: NavController) {
                     modifier = Modifier.padding(20.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    // Tipo de Movimentação
-                    MovementDropdownField("Tipo de Movimentação", "Adoção", darkBlue, inputBorderColor)
-
-                    // Data
-                    MovementInputField("Data", "dd/mm/aaaa", darkBlue, placeholderColor, inputBorderColor, Icons.Default.CalendarToday)
-
-                    // Hora de Início
-                    MovementInputField("Hora de Início", "--:--", darkBlue, placeholderColor, inputBorderColor, Icons.Default.AccessTime)
-
-                    // Status
-                    MovementDropdownField("Status", "Agendado", darkBlue, inputBorderColor)
-
-                    // Responsável
-                    MovementInputField("Responsável", "Nome do responsável", darkBlue, placeholderColor, inputBorderColor)
-
-                    // Data e Hora de Finalização
-                    MovementInputField("Data e Hora de Finalização", "dd/mm/aaaa --:--", darkBlue, placeholderColor, inputBorderColor, Icons.Default.CalendarMonth)
-
-                    // Anotações
-                    Column {
-                        Text(
-                            text = "Anotações",
-                            fontWeight = FontWeight.Bold,
-                            color = darkBlue,
-                            fontSize = 14.sp
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Surface(
+                    // Tipo de Movimentação Dropdown
+                    ExposedDropdownMenuBox(
+                        expanded = typeExpanded,
+                        onExpandedChange = { typeExpanded = !typeExpanded }
+                    ) {
+                        OutlinedTextField(
+                            value = type,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Tipo de Movimentação") },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(100.dp),
+                                .menuAnchor(MenuAnchorType.PrimaryNotEditable, true),
                             shape = RoundedCornerShape(12.dp),
-                            color = Color.White,
-                            border = androidx.compose.foundation.BorderStroke(1.dp, inputBorderColor)
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = typeExpanded) },
+                            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+                        )
+                        ExposedDropdownMenu(
+                            expanded = typeExpanded,
+                            onDismissRequest = { typeExpanded = false }
                         ) {
-                            Box(modifier = Modifier.padding(16.dp)) {
-                                Text(
-                                    text = "Informações sobre o evento de adoção",
-                                    color = placeholderColor,
-                                    fontSize = 14.sp
+                            typeOptions.forEach { option ->
+                                DropdownMenuItem(
+                                    text = { Text(option) },
+                                    onClick = {
+                                        type = option
+                                        typeExpanded = false
+                                    }
                                 )
                             }
                         }
                     }
 
+                    // Data Input with Native Picker
+                    OutlinedTextField(
+                        value = date,
+                        onValueChange = { },
+                        readOnly = true,
+                        label = { Text("Data (dd/mm/aaaa)") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { datePickerDialog.show() },
+                        enabled = false,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            disabledTextColor = Color.Black,
+                            disabledBorderColor = Color.Gray,
+                            disabledLabelColor = Color.Gray,
+                            disabledTrailingIconColor = Color.Gray
+                        ),
+                        shape = RoundedCornerShape(12.dp),
+                        trailingIcon = { 
+                            IconButton(onClick = { datePickerDialog.show() }) {
+                                Icon(Icons.Default.CalendarToday, null)
+                            }
+                        }
+                    )
+
+                    // Hora de Início Input with Native Picker
+                    OutlinedTextField(
+                        value = startTime,
+                        onValueChange = { },
+                        readOnly = true,
+                        label = { Text("Hora de Início") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { startTimePickerDialog.show() },
+                        enabled = false,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            disabledTextColor = Color.Black,
+                            disabledBorderColor = Color.Gray,
+                            disabledLabelColor = Color.Gray,
+                            disabledTrailingIconColor = Color.Gray
+                        ),
+                        shape = RoundedCornerShape(12.dp),
+                        trailingIcon = { 
+                            IconButton(onClick = { startTimePickerDialog.show() }) {
+                                Icon(Icons.Default.AccessTime, null)
+                            }
+                        }
+                    )
+
+                    // Status Dropdown
+                    ExposedDropdownMenuBox(
+                        expanded = statusExpanded,
+                        onExpandedChange = { statusExpanded = !statusExpanded }
+                    ) {
+                        OutlinedTextField(
+                            value = status,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Status") },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .menuAnchor(MenuAnchorType.PrimaryNotEditable, true),
+                            shape = RoundedCornerShape(12.dp),
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = statusExpanded) },
+                            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+                        )
+                        ExposedDropdownMenu(
+                            expanded = statusExpanded,
+                            onDismissRequest = { statusExpanded = false }
+                        ) {
+                            statusOptions.forEach { option ->
+                                DropdownMenuItem(
+                                    text = { Text(option) },
+                                    onClick = {
+                                        status = option
+                                        statusExpanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    OutlinedTextField(
+                        value = responsible,
+                        onValueChange = { responsible = it },
+                        label = { Text("Responsável") },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp)
+                    )
+
+                    // Data e Hora de Finalização with Native Picker
+                    OutlinedTextField(
+                        value = endTime,
+                        onValueChange = { },
+                        readOnly = true,
+                        label = { Text("Data e Hora de Finalização") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { endDateTimePickerDialog.show() },
+                        enabled = false,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            disabledTextColor = Color.Black,
+                            disabledBorderColor = Color.Gray,
+                            disabledLabelColor = Color.Gray,
+                            disabledTrailingIconColor = Color.Gray
+                        ),
+                        shape = RoundedCornerShape(12.dp),
+                        trailingIcon = { 
+                            IconButton(onClick = { endDateTimePickerDialog.show() }) {
+                                Icon(Icons.Default.CalendarMonth, null)
+                            }
+                        }
+                    )
+
+                    OutlinedTextField(
+                        value = notes,
+                        onValueChange = { notes = it },
+                        label = { Text("Anotações") },
+                        modifier = Modifier.fillMaxWidth().height(120.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        maxLines = 4
+                    )
+
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // Buttons
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         Button(
-                            onClick = { },
+                            onClick = { navController.navigateUp() },
                             modifier = Modifier
                                 .weight(1f)
                                 .height(50.dp),
@@ -137,14 +327,36 @@ fun NewMovementScreen(navController: NavController) {
                             Text("Cancelar", color = darkBlue, fontWeight = FontWeight.Bold)
                         }
                         Button(
-                            onClick = { },
+                            onClick = {
+                                val updatedMovement = Movement(
+                                    id = movementId ?: "",
+                                    type = type,
+                                    date = date,
+                                    startTime = startTime,
+                                    status = status,
+                                    responsible = responsible,
+                                    endTime = endTime,
+                                    notes = notes
+                                )
+                                viewModel.saveMovement(
+                                    animalId = animalId,
+                                    movement = updatedMovement,
+                                    onSuccess = { navController.navigateUp() },
+                                    onFailure = { /* Handle error */ }
+                                )
+                            },
                             modifier = Modifier
                                 .weight(1f)
                                 .height(50.dp),
-                                shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = tealPrimary)
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = tealPrimary),
+                            enabled = type.isNotEmpty() && date.isNotEmpty()
                         ) {
-                            Text("Salvar", color = Color.White, fontWeight = FontWeight.Bold)
+                            Text(
+                                text = if (movementId.isNullOrEmpty()) "Salvar" else "Atualizar",
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold
+                            )
                         }
                     }
                 }
@@ -152,88 +364,3 @@ fun NewMovementScreen(navController: NavController) {
         }
     }
 }
-
-@Composable
-fun MovementInputField(
-    label: String,
-    placeholder: String,
-    labelColor: Color,
-    placeholderColor: Color,
-    borderColor: Color,
-    icon: androidx.compose.ui.graphics.vector.ImageVector? = null
-) {
-    Column {
-        Text(
-            text = label,
-            fontWeight = FontWeight.Bold,
-            color = labelColor,
-            fontSize = 14.sp
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp),
-            shape = RoundedCornerShape(12.dp),
-            color = Color.White,
-            border = androidx.compose.foundation.BorderStroke(1.dp, borderColor)
-        ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(text = placeholder, color = placeholderColor, fontSize = 14.sp)
-                if (icon != null) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        tint = Color(0xFFF1F3F4),
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun MovementDropdownField(
-    label: String,
-    value: String,
-    labelColor: Color,
-    borderColor: Color
-) {
-    Column {
-        Text(
-            text = label,
-            fontWeight = FontWeight.Bold,
-            color = labelColor,
-            fontSize = 14.sp
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp),
-            shape = RoundedCornerShape(12.dp),
-            color = Color.White,
-            border = androidx.compose.foundation.BorderStroke(1.dp, borderColor)
-        ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(text = value, color = labelColor, fontSize = 14.sp)
-                Icon(
-                    imageVector = Icons.Default.KeyboardArrowDown,
-                    contentDescription = null,
-                    tint = Color.Black,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-        }
-    }
-}
-
