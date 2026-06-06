@@ -7,6 +7,8 @@ import br.unifor.petcare__ong.data.MovementRepository
 import br.unifor.petcare__ong.data.repository.AnimalRepository
 import br.unifor.petcare__ong.model.Animal
 import br.unifor.petcare__ong.model.Movement
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class MovementViewModel : ViewModel() {
     private val movementRepository = MovementRepository()
@@ -21,13 +23,23 @@ class MovementViewModel : ViewModel() {
     private val _isLoading = mutableStateOf(false)
     val isLoading: State<Boolean> = _isLoading
 
+    private val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+
     fun loadData(animalId: String) {
         _isLoading.value = true
         animalRepository.buscarAnimalPorId(animalId) {
             _animal.value = it
         }
-        movementRepository.listMovements(animalId) {
-            _movements.value = it
+        movementRepository.listMovements(animalId) { list ->
+            // Sort movements by date (descending - most recent first)
+            val sortedList = list.sortedByDescending { movement ->
+                try {
+                    dateFormat.parse(movement.startDateTime)
+                } catch (e: Exception) {
+                    null
+                }
+            }
+            _movements.value = sortedList
             _isLoading.value = false
         }
     }

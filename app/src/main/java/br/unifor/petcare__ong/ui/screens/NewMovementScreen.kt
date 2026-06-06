@@ -40,11 +40,10 @@ fun NewMovementScreen(
     val backgroundGray = Color(0xFFF8F9FA)
 
     var type by remember { mutableStateOf("") }
-    var date by remember { mutableStateOf("") }
-    var startTime by remember { mutableStateOf("") }
+    var startDateTime by remember { mutableStateOf("") }
     var status by remember { mutableStateOf("Agendado") }
     var responsible by remember { mutableStateOf("") }
-    var endTime by remember { mutableStateOf("") }
+    var endDateTime by remember { mutableStateOf("") }
     var notes by remember { mutableStateOf("") }
 
     LaunchedEffect(movementId) {
@@ -52,11 +51,10 @@ fun NewMovementScreen(
             viewModel.fetchMovementById(animalId, movementId) { movement ->
                 movement?.let {
                     type = it.type
-                    date = it.date
-                    startTime = it.startTime
+                    startDateTime = it.startDateTime
                     status = it.status
                     responsible = it.responsible
-                    endTime = it.endTime
+                    endDateTime = it.endDateTime
                     notes = it.notes
                 }
             }
@@ -69,29 +67,27 @@ fun NewMovementScreen(
     var statusExpanded by remember { mutableStateOf(false) }
     val statusOptions = listOf("Agendado", "Em progresso", "Concluído")
 
-    // Date Picker for 'date'
-    val datePickerDialog = DatePickerDialog(
+    // Date and Time Picker for 'startDateTime'
+    val startDateTimePickerDialog = DatePickerDialog(
         context,
         { _, year, month, dayOfMonth ->
-            date = String.format("%02d/%02d/%04d", dayOfMonth, month + 1, year)
+            val selectedDate = String.format("%02d/%02d/%04d", dayOfMonth, month + 1, year)
+            TimePickerDialog(
+                context,
+                { _, hour, minute ->
+                    startDateTime = "$selectedDate " + String.format("%02d:%02d", hour, minute)
+                },
+                calendar.get(Calendar.HOUR_OF_DAY),
+                calendar.get(Calendar.MINUTE),
+                true
+            ).show()
         },
         calendar.get(Calendar.YEAR),
         calendar.get(Calendar.MONTH),
         calendar.get(Calendar.DAY_OF_MONTH)
     )
 
-    // Time Picker for 'startTime'
-    val startTimePickerDialog = TimePickerDialog(
-        context,
-        { _, hour, minute ->
-            startTime = String.format("%02d:%02d", hour, minute)
-        },
-        calendar.get(Calendar.HOUR_OF_DAY),
-        calendar.get(Calendar.MINUTE),
-        true
-    )
-
-    // Date and Time Picker for 'endTime'
+    // Date and Time Picker for 'endDateTime'
     val endDateTimePickerDialog = DatePickerDialog(
         context,
         { _, year, month, dayOfMonth ->
@@ -99,7 +95,7 @@ fun NewMovementScreen(
             TimePickerDialog(
                 context,
                 { _, hour, minute ->
-                    endTime = "$selectedDate " + String.format("%02d:%02d", hour, minute)
+                    endDateTime = "$selectedDate " + String.format("%02d:%02d", hour, minute)
                 },
                 calendar.get(Calendar.HOUR_OF_DAY),
                 calendar.get(Calendar.MINUTE),
@@ -188,15 +184,15 @@ fun NewMovementScreen(
                         }
                     }
 
-                    // Data Input with Native Picker
+                    // Data e Hora de Início Input with Native Picker
                     OutlinedTextField(
-                        value = date,
+                        value = startDateTime,
                         onValueChange = { },
                         readOnly = true,
-                        label = { Text("Data (dd/mm/aaaa)") },
+                        label = { Text("Data e Hora de Início") },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { datePickerDialog.show() },
+                            .clickable { startDateTimePickerDialog.show() },
                         enabled = false,
                         colors = OutlinedTextFieldDefaults.colors(
                             disabledTextColor = Color.Black,
@@ -206,32 +202,8 @@ fun NewMovementScreen(
                         ),
                         shape = RoundedCornerShape(12.dp),
                         trailingIcon = { 
-                            IconButton(onClick = { datePickerDialog.show() }) {
+                            IconButton(onClick = { startDateTimePickerDialog.show() }) {
                                 Icon(Icons.Default.CalendarToday, null)
-                            }
-                        }
-                    )
-
-                    // Hora de Início Input with Native Picker
-                    OutlinedTextField(
-                        value = startTime,
-                        onValueChange = { },
-                        readOnly = true,
-                        label = { Text("Hora de Início") },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { startTimePickerDialog.show() },
-                        enabled = false,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            disabledTextColor = Color.Black,
-                            disabledBorderColor = Color.Gray,
-                            disabledLabelColor = Color.Gray,
-                            disabledTrailingIconColor = Color.Gray
-                        ),
-                        shape = RoundedCornerShape(12.dp),
-                        trailingIcon = { 
-                            IconButton(onClick = { startTimePickerDialog.show() }) {
-                                Icon(Icons.Default.AccessTime, null)
                             }
                         }
                     )
@@ -279,7 +251,7 @@ fun NewMovementScreen(
 
                     // Data e Hora de Finalização with Native Picker
                     OutlinedTextField(
-                        value = endTime,
+                        value = endDateTime,
                         onValueChange = { },
                         readOnly = true,
                         label = { Text("Data e Hora de Finalização") },
@@ -331,11 +303,10 @@ fun NewMovementScreen(
                                 val updatedMovement = Movement(
                                     id = movementId ?: "",
                                     type = type,
-                                    date = date,
-                                    startTime = startTime,
+                                    startDateTime = startDateTime,
                                     status = status,
                                     responsible = responsible,
-                                    endTime = endTime,
+                                    endDateTime = endDateTime,
                                     notes = notes
                                 )
                                 viewModel.saveMovement(
@@ -350,7 +321,7 @@ fun NewMovementScreen(
                                 .height(50.dp),
                             shape = RoundedCornerShape(12.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = tealPrimary),
-                            enabled = type.isNotEmpty() && date.isNotEmpty()
+                            enabled = type.isNotEmpty() && startDateTime.isNotEmpty()
                         ) {
                             Text(
                                 text = if (movementId.isNullOrEmpty()) "Salvar" else "Atualizar",
