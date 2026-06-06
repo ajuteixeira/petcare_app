@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="br.unifor.petcare__ong" />
+                  <option name="mobileSdkAppId" value="1:436274644093:android:cd71e2ce5664e0551b9d14" />
+                  <option name="projectId" value="petcare-ong" />
+                  <option name="projectNumber" value="436274644093" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
