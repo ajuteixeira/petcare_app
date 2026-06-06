@@ -2,6 +2,7 @@ package br.unifor.petcare__ong.ui.screens
 
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -160,7 +161,10 @@ fun AnimalProfileScreen(navController: NavController, animalId: String) {
                                     DetailItem(label = "SEXO", value = animal?.sexo ?: "", modifier = Modifier.weight(1f), grayText, darkBlue)
                                 }
                                 Spacer(modifier = Modifier.height(16.dp))
-                                DetailItem(label = "PORTE", value = animal?.porte ?: "", grayText = grayText, valueColor = darkBlue)
+                                Row(modifier = Modifier.fillMaxWidth()) {
+                                    DetailItem(label = "PORTE", value = animal?.porte ?: "", modifier = Modifier.weight(1f), grayText = grayText, valueColor = darkBlue)
+                                    DetailItem(label = "COMPORTAMENTO", value = animal?.comportamento ?: "N/A", modifier = Modifier.weight(1f), grayText = grayText, valueColor = darkBlue)
+                                }
                                 
                                 Spacer(modifier = Modifier.height(24.dp))
 
@@ -170,15 +174,41 @@ fun AnimalProfileScreen(navController: NavController, animalId: String) {
                                     shape = RoundedCornerShape(12.dp)
                                 ) {
                                     Column(modifier = Modifier.padding(16.dp)) {
-                                        Text(
-                                            text = "COMPORTAMENTO",
-                                            fontSize = 10.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = Color(0xFFB0B0B0)
-                                        )
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(
+                                                text = "DESCRIÇÃO",
+                                                fontSize = 10.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = Color(0xFFB0B0B0)
+                                            )
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                modifier = Modifier.clickable { 
+                                                    // Logic to generate description
+                                                }
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.AutoAwesome,
+                                                    contentDescription = null,
+                                                    tint = tealPrimary,
+                                                    modifier = Modifier.size(16.dp)
+                                                )
+                                                Spacer(modifier = Modifier.width(4.dp))
+                                                Text(
+                                                    text = "Gerar com IA",
+                                                    fontSize = 12.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = tealPrimary
+                                                )
+                                            }
+                                        }
                                         Spacer(modifier = Modifier.height(8.dp))
                                         Text(
-                                            text = animal?.comportamento ?: "Nenhuma descrição informada.",
+                                            text = "Gere uma descrição automática para este animal clicando no botão acima.",
                                             fontSize = 14.sp,
                                             color = Color(0xFF455A64),
                                             lineHeight = 20.sp
