@@ -233,7 +233,7 @@ fun MovementItemCard(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = movement.startDateTime,
+                text = "Saída do abrigo: ${movement.startDateTime}",
                 fontSize = 12.sp,
                 color = Color.LightGray,
                 fontWeight = FontWeight.Medium
@@ -241,7 +241,7 @@ fun MovementItemCard(
 
             if (movement.endDateTime.isNotEmpty()) {
                 Text(
-                    text = "Fim: ${movement.endDateTime}",
+                    text = "Retorno ao abrigo: ${movement.endDateTime}",
                     fontSize = 12.sp,
                     color = Color.LightGray,
                     fontWeight = FontWeight.Medium
