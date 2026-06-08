@@ -3,9 +3,10 @@ package br.unifor.petcare__ong.data
 import com.google.ai.client.generativeai.GenerativeModel
 import br.unifor.petcare__ong.model.Animal
 import br.unifor.petcare__ong.model.Movement
+import br.unifor.petcare__ong.BuildConfig
 
 class AiRepository {
-    private val apiKey = "AIzaSyABz7rXHC1ZeYqub0hUL1ygJbMy0P2q97A"
+    private val apiKey = BuildConfig.GEMINI_API_KEY
     
     private val generativeModel = GenerativeModel(
         modelName = "gemini-3.1-flash-lite-preview",
