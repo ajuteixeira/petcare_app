@@ -25,10 +25,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import br.unifor.petcare__ong.data.AiRepository
 import br.unifor.petcare__ong.data.repository.AnimalRepository
 import br.unifor.petcare__ong.model.Animal
 import br.unifor.petcare__ong.ui.navigation.Routes
 import coil.compose.AsyncImage
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,8 +43,14 @@ fun AnimalProfileScreen(navController: NavController, animalId: String) {
 
     val context = LocalContext.current
     val repository = remember { AnimalRepository() }
+    val aiRepository = remember { AiRepository() }
+    val scope = rememberCoroutineScope()
+
     var animal by remember { mutableStateOf<Animal?>(null) }
     var isLoading by remember { mutableStateOf(true) }
+    
+    var aiDescription by remember { mutableStateOf("") }
+    var isGenerating by remember { mutableStateOf(false) }
 
     LaunchedEffect(animalId) {
         repository.buscarAnimalPorId(animalId) { result ->
@@ -188,15 +196,38 @@ fun AnimalProfileScreen(navController: NavController, animalId: String) {
                                             Row(
                                                 verticalAlignment = Alignment.CenterVertically,
                                                 modifier = Modifier.clickable { 
-                                                    // Logic to generate description
+                                                    if (!isGenerating && animal != null) {
+                                                        isGenerating = true
+                                                        scope.launch {
+                                                            val result = aiRepository.generateDescription(
+                                                                animal!!.nome,
+                                                                animal!!.especie,
+                                                                animal!!.comportamento
+                                                            )
+                                                            if (result != null) {
+                                                                aiDescription = result
+                                                            } else {
+                                                                Toast.makeText(context, "Erro ao gerar descrição", Toast.LENGTH_SHORT).show()
+                                                            }
+                                                            isGenerating = false
+                                                        }
+                                                    }
                                                 }
                                             ) {
-                                                Icon(
-                                                    imageVector = Icons.Default.AutoAwesome,
-                                                    contentDescription = null,
-                                                    tint = tealPrimary,
-                                                    modifier = Modifier.size(16.dp)
-                                                )
+                                                if (isGenerating) {
+                                                    CircularProgressIndicator(
+                                                        modifier = Modifier.size(16.dp),
+                                                        strokeWidth = 2.dp,
+                                                        color = tealPrimary
+                                                    )
+                                                } else {
+                                                    Icon(
+                                                        imageVector = Icons.Default.AutoAwesome,
+                                                        contentDescription = null,
+                                                        tint = tealPrimary,
+                                                        modifier = Modifier.size(16.dp)
+                                                    )
+                                                }
                                                 Spacer(modifier = Modifier.width(4.dp))
                                                 Text(
                                                     text = "Gerar com IA",
@@ -208,7 +239,7 @@ fun AnimalProfileScreen(navController: NavController, animalId: String) {
                                         }
                                         Spacer(modifier = Modifier.height(8.dp))
                                         Text(
-                                            text = "Gere uma descrição automática para este animal clicando no botão acima.",
+                                            text = if (isGenerating) "Gerando descrição..." else if (aiDescription.isNotEmpty()) aiDescription else "Gere uma descrição automática para este animal clicando no botão acima.",
                                             fontSize = 14.sp,
                                             color = Color(0xFF455A64),
                                             lineHeight = 20.sp
