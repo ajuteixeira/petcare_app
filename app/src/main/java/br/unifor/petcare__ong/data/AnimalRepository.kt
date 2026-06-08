@@ -67,6 +67,18 @@ class AnimalRepository {
             .addOnFailureListener { onFailure(it) }
     }
 
+    fun atualizarDescricao(
+        id: String,
+        descricao: String,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        database.child(id).child("descricao")
+            .setValue(descricao)
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { onFailure(it) }
+    }
+
     fun deletarAnimal(
         id: String,
         onSuccess: () -> Unit,
