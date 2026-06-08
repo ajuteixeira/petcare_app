@@ -10,5 +10,6 @@ data class Animal(
     val porte: String = "",
     val status: String = "Disponível",
     val comportamento: String = "",
-    val fotoUrl: String? = null
+    val fotoUrl: String? = null,
+    val descricao: String = ""
 )

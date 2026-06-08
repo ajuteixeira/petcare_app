@@ -57,6 +57,7 @@ fun AnimalProfileScreen(navController: NavController, animalId: String) {
     LaunchedEffect(animalId) {
         repository.buscarAnimalPorId(animalId) { result ->
             animal = result
+            aiDescription = result?.descricao ?: ""
             isLoading = false
         }
     }
@@ -209,6 +210,16 @@ fun AnimalProfileScreen(navController: NavController, animalId: String) {
                                                                 )
                                                                 if (result != null) {
                                                                     aiDescription = result
+                                                                    repository.atualizarDescricao(
+                                                                        id = animalId,
+                                                                        descricao = result,
+                                                                        onSuccess = {
+                                                                            Toast.makeText(context, "Descrição salva!", Toast.LENGTH_SHORT).show()
+                                                                        },
+                                                                        onFailure = {
+                                                                            Toast.makeText(context, "Erro ao salvar: ${it.message}", Toast.LENGTH_SHORT).show()
+                                                                        }
+                                                                    )
                                                                 } else {
                                                                     Toast.makeText(context, "Erro ao gerar descrição", Toast.LENGTH_SHORT).show()
                                                                 }
