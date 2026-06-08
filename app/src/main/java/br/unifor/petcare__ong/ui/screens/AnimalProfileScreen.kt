@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import br.unifor.petcare__ong.data.AiRepository
+import br.unifor.petcare__ong.data.MovementRepository
 import br.unifor.petcare__ong.data.repository.AnimalRepository
 import br.unifor.petcare__ong.model.Animal
 import br.unifor.petcare__ong.ui.navigation.Routes
@@ -44,6 +45,7 @@ fun AnimalProfileScreen(navController: NavController, animalId: String) {
     val context = LocalContext.current
     val repository = remember { AnimalRepository() }
     val aiRepository = remember { AiRepository() }
+    val movementRepository = remember { MovementRepository() }
     val scope = rememberCoroutineScope()
 
     var animal by remember { mutableStateOf<Animal?>(null) }
@@ -198,18 +200,20 @@ fun AnimalProfileScreen(navController: NavController, animalId: String) {
                                                 modifier = Modifier.clickable { 
                                                     if (!isGenerating && animal != null) {
                                                         isGenerating = true
-                                                        scope.launch {
-                                                            val result = aiRepository.generateDescription(
-                                                                animal!!.nome,
-                                                                animal!!.especie,
-                                                                animal!!.comportamento
-                                                            )
-                                                            if (result != null) {
-                                                                aiDescription = result
-                                                            } else {
-                                                                Toast.makeText(context, "Erro ao gerar descrição", Toast.LENGTH_SHORT).show()
+                                                        
+                                                        movementRepository.listMovements(animalId) { movements ->
+                                                            scope.launch {
+                                                                val result = aiRepository.generateDescription(
+                                                                    animal!!,
+                                                                    movements
+                                                                )
+                                                                if (result != null) {
+                                                                    aiDescription = result
+                                                                } else {
+                                                                    Toast.makeText(context, "Erro ao gerar descrição", Toast.LENGTH_SHORT).show()
+                                                                }
+                                                                isGenerating = false
                                                             }
-                                                            isGenerating = false
                                                         }
                                                     }
                                                 }
