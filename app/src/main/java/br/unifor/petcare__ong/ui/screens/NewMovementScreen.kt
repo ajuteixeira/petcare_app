@@ -39,6 +39,10 @@ fun NewMovementScreen(
     val tealPrimary = Color(0xFF009688)
     val backgroundGray = Color(0xFFF8F9FA)
 
+    val entradaOptions = listOf("Resgate", "Abandono", "Devolução", "Transferência", "Outro")
+    val saidaOptions = listOf("Evento de adoção", "Cirurgia", "Consulta", "Lar temporário", "Passeio", "Óbito", "Outro")
+
+    var category by remember { mutableStateOf("Entrada") }
     var type by remember { mutableStateOf("") }
     var startDateTime by remember { mutableStateOf("") }
     var status by remember { mutableStateOf("Agendado") }
@@ -50,6 +54,11 @@ fun NewMovementScreen(
         if (!movementId.isNullOrEmpty()) {
             viewModel.fetchMovementById(animalId, movementId) { movement ->
                 movement?.let {
+                    if (entradaOptions.contains(it.type)) {
+                        category = "Entrada"
+                    } else if (saidaOptions.contains(it.type)) {
+                        category = "Saída"
+                    }
                     type = it.type
                     startDateTime = it.startDateTime
                     status = it.status
@@ -61,8 +70,11 @@ fun NewMovementScreen(
         }
     }
 
+    var categoryExpanded by remember { mutableStateOf(false) }
+    val categoryOptions = listOf("Entrada", "Saída")
+
     var typeExpanded by remember { mutableStateOf(false) }
-    val typeOptions = listOf("Evento de adoção", "Cirurgia", "Consulta", "Passeio", "Lar temporário", "Outro")
+    val typeOptions = if (category == "Entrada") entradaOptions else saidaOptions
 
     var statusExpanded by remember { mutableStateOf(false) }
     val statusOptions = listOf("Agendado", "Em progresso", "Concluído")
@@ -151,6 +163,42 @@ fun NewMovementScreen(
                     modifier = Modifier.padding(20.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
+                    // Categoria Dropdown
+                    ExposedDropdownMenuBox(
+                        expanded = categoryExpanded,
+                        onExpandedChange = { categoryExpanded = !categoryExpanded }
+                    ) {
+                        OutlinedTextField(
+                            value = category,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Categoria") },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .menuAnchor(MenuAnchorType.PrimaryNotEditable, true),
+                            shape = RoundedCornerShape(12.dp),
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded) },
+                            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+                        )
+                        ExposedDropdownMenu(
+                            expanded = categoryExpanded,
+                            onDismissRequest = { categoryExpanded = false }
+                        ) {
+                            categoryOptions.forEach { option ->
+                                DropdownMenuItem(
+                                    text = { Text(option) },
+                                    onClick = {
+                                        if (category != option) {
+                                            category = option
+                                            type = "" // Clear type when category changes
+                                        }
+                                        categoryExpanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+
                     // Tipo de Movimentação Dropdown
                     ExposedDropdownMenuBox(
                         expanded = typeExpanded,
