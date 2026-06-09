@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
@@ -18,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -247,15 +249,46 @@ fun RecordItem(
                     fontWeight = FontWeight.Bold,
                     color = titleColor
                 )
-                if (!record.veterinarian.isNullOrEmpty()) {
-                    Text(
-                        text = "Profissional: ${record.veterinarian}",
-                        fontSize = 13.sp,
-                        color = subtitleColor
-                    )
+
+                // Detalhes específicos por tipo
+                when (record.type) {
+                    "VACINA" -> {
+                        if (!record.batch.isNullOrEmpty()) {
+                            RecordDetail(Icons.Default.ConfirmationNumber, "Lote: ${record.batch}", subtitleColor)
+                        }
+                        if (!record.nextDose.isNullOrEmpty()) {
+                            RecordDetail(Icons.Default.Event, "Próxima Dose: ${record.nextDose}", Color(0xFF009688))
+                        }
+                    }
+                    "CONSULTA" -> {
+                        if (!record.veterinarian.isNullOrEmpty()) {
+                            RecordDetail(Icons.Default.Person, "Veterinário: ${record.veterinarian}", subtitleColor)
+                        }
+                        if (!record.reason.isNullOrEmpty()) {
+                            RecordDetail(Icons.Default.Info, "Motivo: ${record.reason}", subtitleColor)
+                        }
+                        if (!record.diagnosis.isNullOrEmpty()) {
+                            RecordDetail(Icons.Default.Healing, "Diagnóstico: ${record.diagnosis}", subtitleColor)
+                        }
+                        if (!record.prescription.isNullOrEmpty()) {
+                            RecordDetail(Icons.AutoMirrored.Filled.Assignment, "Prescrição: ${record.prescription}", subtitleColor)
+                        }
+                    }
+                    "TRATAMENTO" -> {
+                        if (!record.medication.isNullOrEmpty()) {
+                            RecordDetail(Icons.Default.Medication, "Medicamento: ${record.medication}", subtitleColor)
+                        }
+                        if (!record.dosage.isNullOrEmpty()) {
+                            RecordDetail(Icons.Default.Scale, "Dosagem: ${record.dosage}", subtitleColor)
+                        }
+                        if (!record.endDate.isNullOrEmpty()) {
+                            RecordDetail(Icons.Default.DateRange, "Término: ${record.endDate}", subtitleColor)
+                        }
+                    }
                 }
+
                 if (record.description.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = record.description,
                         fontSize = 14.sp,
@@ -264,5 +297,26 @@ fun RecordItem(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun RecordDetail(icon: ImageVector, text: String, color: Color) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(top = 4.dp)
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(14.dp),
+            tint = color.copy(alpha = 0.7f)
+        )
+        Spacer(modifier = Modifier.width(6.dp))
+        Text(
+            text = text,
+            fontSize = 13.sp,
+            color = color
+        )
     }
 }
