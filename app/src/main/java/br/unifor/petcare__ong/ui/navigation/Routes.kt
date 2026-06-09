@@ -21,9 +21,14 @@ sealed class Routes(val route: String) {
         fun createRoute(animalId: String) = "edit_animal/$animalId"
     }
 
-    object MedicalRecord : Routes("medical_record")
+    object MedicalRecord : Routes("medical_record/{animalId}") {
+        fun createRoute(animalId: String) = "medical_record/$animalId"
+    }
 
-    object NewRecord : Routes("new_record")
+    object NewRecord : Routes("new_record/{animalId}?recordId={recordId}") {
+        fun createRoute(animalId: String, recordId: String? = null) =
+            if (recordId != null) "new_record/$animalId?recordId=$recordId" else "new_record/$animalId"
+    }
 
     object MovementHistory : Routes("movement_history/{animalId}") {
         fun createRoute(animalId: String) = "movement_history/$animalId"
