@@ -55,6 +55,7 @@ fun AddAnimalScreen(navController: NavController, animalId: String? = null) {
     var porte by remember { mutableStateOf("Pequeno") }
     var comportamento by remember { mutableStateOf("") }
     var status by remember { mutableStateOf("Disponível") }
+    var descricao by remember { mutableStateOf("") }
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     var existingFotoUrl by remember { mutableStateOf<String?>(null) }
 
@@ -76,6 +77,7 @@ fun AddAnimalScreen(navController: NavController, animalId: String? = null) {
                     porte = it.porte
                     comportamento = it.comportamento
                     status = it.status
+                    descricao = it.descricao
                     existingFotoUrl = it.fotoUrl
                 }
             }
@@ -270,7 +272,8 @@ fun AddAnimalScreen(navController: NavController, animalId: String? = null) {
                                         porte = porte,
                                         comportamento = comportamento,
                                         status = status,
-                                        fotoUrl = finalFotoUrl
+                                        fotoUrl = finalFotoUrl,
+                                        descricao = descricao
                                     )
 
                                     if (isEditing) {

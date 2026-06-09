@@ -28,6 +28,7 @@ import androidx.navigation.NavController
 import br.unifor.petcare__ong.data.AiRepository
 import br.unifor.petcare__ong.data.MovementRepository
 import br.unifor.petcare__ong.data.AnimalRepository
+import br.unifor.petcare__ong.data.MedicalRecordRepository
 import br.unifor.petcare__ong.model.Animal
 import br.unifor.petcare__ong.ui.navigation.Routes
 import coil.compose.AsyncImage
@@ -46,6 +47,7 @@ fun AnimalProfileScreen(navController: NavController, animalId: String) {
     val repository = remember { AnimalRepository() }
     val aiRepository = remember { AiRepository() }
     val movementRepository = remember { MovementRepository() }
+    val medicalRecordRepository = remember { MedicalRecordRepository() }
     val scope = rememberCoroutineScope()
 
     var animal by remember { mutableStateOf<Animal?>(null) }
@@ -203,27 +205,30 @@ fun AnimalProfileScreen(navController: NavController, animalId: String) {
                                                         isGenerating = true
                                                         
                                                         movementRepository.listMovements(animalId) { movements ->
-                                                            scope.launch {
-                                                                val result = aiRepository.generateDescription(
-                                                                    animal!!,
-                                                                    movements
-                                                                )
-                                                                if (result != null) {
-                                                                    aiDescription = result
-                                                                    repository.atualizarDescricao(
-                                                                        id = animalId,
-                                                                        descricao = result,
-                                                                        onSuccess = {
-                                                                            Toast.makeText(context, "Descrição salva!", Toast.LENGTH_SHORT).show()
-                                                                        },
-                                                                        onFailure = {
-                                                                            Toast.makeText(context, "Erro ao salvar: ${it.message}", Toast.LENGTH_SHORT).show()
-                                                                        }
+                                                            medicalRecordRepository.listRecords(animalId) { records ->
+                                                                scope.launch {
+                                                                    val result = aiRepository.generateDescription(
+                                                                        animal!!,
+                                                                        movements,
+                                                                        records
                                                                     )
-                                                                } else {
-                                                                    Toast.makeText(context, "Erro ao gerar descrição", Toast.LENGTH_SHORT).show()
+                                                                    if (result != null) {
+                                                                        aiDescription = result
+                                                                        repository.atualizarDescricao(
+                                                                            id = animalId,
+                                                                            descricao = result,
+                                                                            onSuccess = {
+                                                                                Toast.makeText(context, "Descrição salva!", Toast.LENGTH_SHORT).show()
+                                                                            },
+                                                                            onFailure = {
+                                                                                Toast.makeText(context, "Erro ao salvar: ${it.message}", Toast.LENGTH_SHORT).show()
+                                                                            }
+                                                                        )
+                                                                    } else {
+                                                                        Toast.makeText(context, "Erro ao gerar descrição", Toast.LENGTH_SHORT).show()
+                                                                    }
+                                                                    isGenerating = false
                                                                 }
-                                                                isGenerating = false
                                                             }
                                                         }
                                                     }
