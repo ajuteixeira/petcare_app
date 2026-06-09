@@ -3,6 +3,7 @@ package br.unifor.petcare__ong.data
 import com.google.ai.client.generativeai.GenerativeModel
 import br.unifor.petcare__ong.model.Animal
 import br.unifor.petcare__ong.model.Movement
+import br.unifor.petcare__ong.model.MedicalRecord
 import br.unifor.petcare__ong.BuildConfig
 
 class AiRepository {
@@ -15,11 +16,17 @@ class AiRepository {
 
     suspend fun generateDescription(
         animal: Animal,
-        movements: List<Movement>
+        movements: List<Movement>,
+        medicalRecords: List<MedicalRecord>
     ): String? {
         val movementsContext = if (movements.isEmpty()) "Nenhuma movimentação registrada." 
         else movements.joinToString("\n") { 
             "- Tipo: ${it.type}, Data/Hora: ${it.startDateTime}, Status: ${it.status}, Notas: ${it.notes}"
+        }
+
+        val medicalRecordsContext = if (medicalRecords.isEmpty()) "Nenhum prontuário médico registrado."
+        else medicalRecords.joinToString("\n") {
+            "- Tipo: ${it.type}, Data: ${it.date}, Título: ${it.title}, Descrição: ${it.description}${it.diagnosis?.let { d -> ", Diagnóstico: $d" } ?: ""}${it.medication?.let { m -> ", Medicamento: $m" } ?: ""}"
         }
         
         val prompt = """
@@ -36,7 +43,8 @@ class AiRepository {
             - A data e hora em que ocorreu ou ocorrerá.
             - O status atual (se está agendada, em andamento ou se já foi concluída).
 
-            Destaque informações relevantes de saúde APENAS se elas estiverem mencionadas explicitamente nas fontes abaixo.
+            INFORMAÇÃO DE SAÚDE E PRONTUÁRIO:
+            Você DEVE incluir um resumo das informações médicas mais relevantes (vacinas, consultas, tratamentos), destacando condições de saúde atuais ou observações importantes presentes no prontuário.
 
             FONTES DE INFORMAÇÃO (PROIBIDO INVENTAR DADOS):
             1. PERFIL DO ANIMAL:
@@ -50,6 +58,9 @@ class AiRepository {
 
             2. HISTÓRICO DE MOVIMENTAÇÕES:
             $movementsContext
+
+            3. PRONTUÁRIO MÉDICO:
+            $medicalRecordsContext
 
             REGRAS CRÍTICAS:
             1. Baseie-se EXCLUSIVAMENTE nas fontes fornecidas. Não adicione informações externas ou fictícias.
