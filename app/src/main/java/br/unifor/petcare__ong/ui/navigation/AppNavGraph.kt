@@ -54,7 +54,12 @@ fun AppNavGraph() {
 
         composable(Routes.NewRecord.route) { backStackEntry ->
             val animalId = backStackEntry.arguments?.getString("animalId") ?: ""
-            val recordId = backStackEntry.arguments?.getString("recordId")
+            NewRecordScreen(navController, animalId)
+        }
+
+        composable(Routes.EditRecord.route) { backStackEntry ->
+            val animalId = backStackEntry.arguments?.getString("animalId") ?: ""
+            val recordId = backStackEntry.arguments?.getString("recordId") ?: ""
             NewRecordScreen(navController, animalId, recordId)
         }
 

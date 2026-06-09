@@ -37,17 +37,23 @@ fun NewRecordScreen(
     val tealPrimary = Color(0xFF009688)
     val backgroundGray = Color(0xFFF8F9FA)
 
+    val isEditing = recordId != null
     var selectedTabIndex by remember { mutableIntStateOf(0) }
-    val tabs = listOf("Vacinas", "Consultas", "Tratamentos", "Observações")
-    val types = listOf("VACINA", "CONSULTA", "TRATAMENTO", "OBSERVAÇÃO")
+    val tabs = listOf("VACINA", "CONSULTA", "TRATAMENTO", "OBSERVAÇÃO")
 
-    var title by remember { mutableStateOf("") }
+    // Form State
     var date by remember { mutableStateOf("") }
-    var professional by remember { mutableStateOf("") }
+    var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
-    var prescription by remember { mutableStateOf("") }
+    var batch by remember { mutableStateOf("") }
     var nextDose by remember { mutableStateOf("") }
-    var lot by remember { mutableStateOf("") }
+    var veterinarian by remember { mutableStateOf("") }
+    var reason by remember { mutableStateOf("") }
+    var diagnosis by remember { mutableStateOf("") }
+    var prescription by remember { mutableStateOf("") }
+    var endDate by remember { mutableStateOf("") }
+    var medication by remember { mutableStateOf("") }
+    var dosage by remember { mutableStateOf("") }
 
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
@@ -66,17 +72,22 @@ fun NewRecordScreen(
     }
 
     LaunchedEffect(recordId) {
-        if (!recordId.isNullOrEmpty()) {
+        if (isEditing && recordId != null) {
             viewModel.fetchRecordById(animalId, recordId) { record ->
                 record?.let {
-                    selectedTabIndex = types.indexOf(it.type).coerceAtLeast(0)
-                    title = it.title
                     date = it.date
-                    professional = it.professional
+                    title = it.title
                     description = it.description
-                    prescription = it.prescription
-                    nextDose = it.nextDose
-                    lot = it.lot
+                    batch = it.batch ?: ""
+                    nextDose = it.nextDose ?: ""
+                    veterinarian = it.veterinarian ?: ""
+                    reason = it.reason ?: ""
+                    diagnosis = it.diagnosis ?: ""
+                    prescription = it.prescription ?: ""
+                    endDate = it.endDate ?: ""
+                    medication = it.medication ?: ""
+                    dosage = it.dosage ?: ""
+                    selectedTabIndex = tabs.indexOf(it.type).coerceAtLeast(0)
                 }
             }
         }
@@ -87,7 +98,7 @@ fun NewRecordScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = if (recordId.isNullOrEmpty()) "Novo Registro" else "Editar Registro",
+                        text = if (isEditing) "Editar Registro" else "Novo Registro",
                         fontWeight = FontWeight.Bold,
                         color = darkBlue,
                         fontSize = 18.sp
@@ -121,13 +132,13 @@ fun NewRecordScreen(
                 },
                 divider = {}
             ) {
-                tabs.forEachIndexed { index, tabTitle ->
+                tabs.forEachIndexed { index, titleText ->
                     Tab(
                         selected = selectedTabIndex == index,
-                        onClick = { selectedTabIndex = index },
+                        onClick = { if (!isEditing) selectedTabIndex = index },
                         text = {
                             Text(
-                                text = tabTitle,
+                                text = titleText,
                                 fontSize = 13.sp,
                                 fontWeight = if (selectedTabIndex == index) FontWeight.Bold else FontWeight.Normal,
                                 color = if (selectedTabIndex == index) tealPrimary else Color.Gray
@@ -154,33 +165,33 @@ fun NewRecordScreen(
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         when (selectedTabIndex) {
-                            0 -> { // Vacinas
-                                FormField("Nome da Vacina", title, { title = it }, "Ex: Antirrábica")
-                                FormField("Data de Aplicação", date, { }, "dd/mm/aaaa", isDate = true, onClick = { showDatePicker { date = it } })
-                                FormField("Lote", lot, { lot = it }, "Número do lote")
-                                FormField("Próxima Dose", nextDose, { }, "dd/mm/aaaa", isDate = true, onClick = { showDatePicker { nextDose = it } })
-                                LargeFormField("Observações", description, { description = it }, "Informações adicionais")
-                            }
-                            1 -> { // Consultas
-                                FormField("Data da Consulta", date, { }, "dd/mm/aaaa", isDate = true, onClick = { showDatePicker { date = it } })
-                                FormField("Veterinário", professional, { professional = it }, "Nome do veterinário")
-                                FormField("Motivo", title, { title = it }, "Motivo da consulta")
-                                LargeFormField("Diagnóstico", description, { description = it }, "Diagnóstico e observações")
-                                LargeFormField("Prescrição", prescription, { prescription = it }, "Medicamentos prescritos")
-                            }
-                            2 -> { // Tratamentos
-                                FormField("Tipo de Tratamento", title, { title = it }, "Ex: Vermífugo")
-                                FormField("Data de Início", date, { }, "dd/mm/aaaa", isDate = true, onClick = { showDatePicker { date = it } })
-                                FormField("Data de Término", nextDose, { }, "dd/mm/aaaa", isDate = true, onClick = { showDatePicker { nextDose = it } })
-                                FormField("Medicamento", prescription, { prescription = it }, "Nome do medicamento")
-                                FormField("Dosagem", lot, { lot = it }, "Ex: 1 comp. 2x ao dia")
-                                LargeFormField("Observações", description, { description = it }, "Informações adicionais")
-                            }
-                            3 -> { // Observações
-                                FormField("Data", date, { }, "dd/mm/aaaa", isDate = true, onClick = { showDatePicker { date = it } })
-                                FormField("Título", title, { title = it }, "Título da observação")
-                                LargeFormField("Descrição", description, { description = it }, "Descreva a observação...")
-                            }
+                            0 -> VacinasForm(
+                                title, { title = it },
+                                date, { showDatePicker { date = it } },
+                                batch, { batch = it },
+                                nextDose, { showDatePicker { nextDose = it } },
+                                description, { description = it }
+                            )
+                            1 -> ConsultasForm(
+                                date, { showDatePicker { date = it } },
+                                veterinarian, { veterinarian = it },
+                                reason, { reason = it },
+                                diagnosis, { diagnosis = it },
+                                prescription, { prescription = it }
+                            )
+                            2 -> TratamentosForm(
+                                title, { title = it },
+                                date, { showDatePicker { date = it } },
+                                endDate, { showDatePicker { endDate = it } },
+                                medication, { medication = it },
+                                dosage, { dosage = it },
+                                description, { description = it }
+                            )
+                            3 -> ObservacoesForm(
+                                date, { showDatePicker { date = it } },
+                                title, { title = it },
+                                description, { description = it }
+                            )
                         }
 
                         Spacer(modifier = Modifier.height(8.dp))
@@ -201,30 +212,39 @@ fun NewRecordScreen(
                             }
                             Button(
                                 onClick = {
-                                    val newRecord = MedicalRecord(
+                                    val finalTitle = if (selectedTabIndex == 1) "Consulta com $veterinarian" else title
+                                    val record = MedicalRecord(
                                         id = recordId ?: "",
-                                        type = types[selectedTabIndex],
-                                        title = title,
+                                        animalId = animalId,
+                                        type = tabs[selectedTabIndex],
                                         date = date,
-                                        professional = professional,
+                                        title = finalTitle,
                                         description = description,
-                                        prescription = prescription,
+                                        batch = batch,
                                         nextDose = nextDose,
-                                        lot = lot
+                                        veterinarian = veterinarian,
+                                        reason = reason,
+                                        diagnosis = diagnosis,
+                                        prescription = prescription,
+                                        endDate = endDate,
+                                        medication = medication,
+                                        dosage = dosage
                                     )
-                                    viewModel.saveRecord(animalId, newRecord, {
+                                    viewModel.saveRecord(animalId, record, {
                                         navController.navigateUp()
-                                    }, { })
+                                    }, {
+                                        // Handle error
+                                    })
                                 },
                                 modifier = Modifier
                                     .weight(1f)
                                     .height(50.dp),
                                 shape = RoundedCornerShape(12.dp),
                                 colors = ButtonDefaults.buttonColors(containerColor = tealPrimary),
-                                enabled = date.isNotEmpty() && title.isNotEmpty()
+                                enabled = date.isNotEmpty() && (title.isNotEmpty() || (selectedTabIndex == 1 && veterinarian.isNotEmpty()))
                             ) {
                                 Text(
-                                    if (recordId.isNullOrEmpty()) "Salvar" else "Atualizar",
+                                    if (!isEditing) "Salvar" else "Atualizar",
                                     color = Color.White,
                                     fontWeight = FontWeight.Bold
                                 )
@@ -238,11 +258,77 @@ fun NewRecordScreen(
 }
 
 @Composable
-fun FormField(
+fun VacinasForm(
+    name: String, onNameChange: (String) -> Unit,
+    date: String, onDateClick: () -> Unit,
+    batch: String, onBatchChange: (String) -> Unit,
+    nextDose: String, onNextDoseClick: () -> Unit,
+    obs: String, onObsChange: (String) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        FormFieldItem("Nome da Vacina", "Ex: Antirrábica", name, onNameChange)
+        FormFieldItem("Data de Aplicação", "dd/mm/aaaa", date, {}, isDate = true, onClick = onDateClick)
+        FormFieldItem("Lote", "Número do lote", batch, onBatchChange)
+        FormFieldItem("Próxima Dose", "dd/mm/aaaa", nextDose, {}, isDate = true, onClick = onNextDoseClick)
+        LargeFormFieldItem("Observações", "Informações adicionais", obs, onObsChange)
+    }
+}
+
+@Composable
+fun ConsultasForm(
+    date: String, onDateClick: () -> Unit,
+    vet: String, onVetChange: (String) -> Unit,
+    reason: String, onReasonChange: (String) -> Unit,
+    diag: String, onDiagChange: (String) -> Unit,
+    presc: String, onPrescChange: (String) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        FormFieldItem("Data da Consulta", "dd/mm/aaaa", date, {}, isDate = true, onClick = onDateClick)
+        FormFieldItem("Veterinário", "Nome do veterinário", vet, onVetChange)
+        FormFieldItem("Motivo", "Motivo da consulta", reason, onReasonChange)
+        LargeFormFieldItem("Diagnóstico", "Diagnóstico e observações", diag, onDiagChange)
+        LargeFormFieldItem("Prescrição", "Medicamentos prescritos", presc, onPrescChange)
+    }
+}
+
+@Composable
+fun TratamentosForm(
+    type: String, onTypeChange: (String) -> Unit,
+    startDate: String, onStartDateClick: () -> Unit,
+    endDate: String, onEndDateClick: () -> Unit,
+    med: String, onMedChange: (String) -> Unit,
+    dosage: String, onDosageChange: (String) -> Unit,
+    obs: String, onObsChange: (String) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        FormFieldItem("Tipo de Tratamento", "Ex: Vermífugo", type, onTypeChange)
+        FormFieldItem("Data de Início", "dd/mm/aaaa", startDate, {}, isDate = true, onClick = onStartDateClick)
+        FormFieldItem("Data de Término", "dd/mm/aaaa", endDate, {}, isDate = true, onClick = onEndDateClick)
+        FormFieldItem("Medicamento", "Nome do medicamento", med, onMedChange)
+        FormFieldItem("Dosagem", "Ex: 1 comp. 2x ao dia", dosage, onDosageChange)
+        LargeFormFieldItem("Observações", "Informações adicionais", obs, onObsChange)
+    }
+}
+
+@Composable
+fun ObservacoesForm(
+    date: String, onDateClick: () -> Unit,
+    title: String, onTitleChange: (String) -> Unit,
+    desc: String, onDescChange: (String) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        FormFieldItem("Data", "dd/mm/aaaa", date, {}, isDate = true, onClick = onDateClick)
+        FormFieldItem("Título", "Título da observação", title, onTitleChange)
+        LargeFormFieldItem("Descrição", "Descreva a observação...", desc, onDescChange)
+    }
+}
+
+@Composable
+fun FormFieldItem(
     label: String,
+    placeholder: String,
     value: String,
     onValueChange: (String) -> Unit,
-    placeholder: String,
     isDate: Boolean = false,
     onClick: (() -> Unit)? = null
 ) {
@@ -254,30 +340,41 @@ fun FormField(
             onValueChange = onValueChange,
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { onClick?.invoke() },
-            placeholder = { Text(placeholder, fontSize = 14.sp) },
+                .then(if (isDate) Modifier.clickable { onClick?.invoke() } else Modifier),
+            placeholder = { Text(text = placeholder, color = Color.LightGray, fontSize = 14.sp) },
             shape = RoundedCornerShape(12.dp),
             readOnly = isDate,
             enabled = !isDate,
-            colors = OutlinedTextFieldDefaults.colors(
-                disabledTextColor = Color.Black,
-                disabledBorderColor = Color(0xFFEEEEEE),
-                disabledLabelColor = Color.Gray,
-                disabledPlaceholderColor = Color.LightGray
-            ),
             trailingIcon = {
                 if (isDate) {
                     IconButton(onClick = { onClick?.invoke() }) {
-                        Icon(Icons.Default.CalendarToday, null, modifier = Modifier.size(20.dp))
+                        Icon(
+                            imageVector = Icons.Default.CalendarToday,
+                            contentDescription = null,
+                            tint = Color.Gray.copy(alpha = 0.5f),
+                            modifier = Modifier.size(20.dp)
+                        )
                     }
                 }
-            }
+            },
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color(0xFF009688),
+                unfocusedBorderColor = Color(0xFFEEEEEE),
+                disabledTextColor = Color.Black,
+                disabledBorderColor = Color(0xFFEEEEEE),
+                disabledPlaceholderColor = Color.LightGray
+            )
         )
     }
 }
 
 @Composable
-fun LargeFormField(label: String, value: String, onValueChange: (String) -> Unit, placeholder: String) {
+fun LargeFormFieldItem(
+    label: String,
+    placeholder: String,
+    value: String,
+    onValueChange: (String) -> Unit
+) {
     Column {
         Text(text = label, fontWeight = FontWeight.Bold, color = Color(0xFF0D1B3E), fontSize = 14.sp)
         Spacer(modifier = Modifier.height(8.dp))
@@ -287,9 +384,12 @@ fun LargeFormField(label: String, value: String, onValueChange: (String) -> Unit
             modifier = Modifier
                 .fillMaxWidth()
                 .height(120.dp),
-            placeholder = { Text(placeholder, fontSize = 14.sp) },
+            placeholder = { Text(text = placeholder, color = Color.LightGray, fontSize = 14.sp) },
             shape = RoundedCornerShape(12.dp),
-            maxLines = 5
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color(0xFF009688),
+                unfocusedBorderColor = Color(0xFFEEEEEE)
+            )
         )
     }
 }

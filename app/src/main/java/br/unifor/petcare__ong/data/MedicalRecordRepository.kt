@@ -18,7 +18,7 @@ class MedicalRecordRepository {
     ) {
         val recordRef = database.child(animalId).child("prontuario")
         val id = if (record.id.isEmpty()) recordRef.push().key ?: return else record.id
-        val recordWithId = record.copy(id = id)
+        val recordWithId = record.copy(id = id, animalId = animalId)
 
         recordRef.child(id)
             .setValue(recordWithId)
@@ -37,7 +37,7 @@ class MedicalRecordRepository {
                             records.add(record)
                         }
                     }
-                    onDataChange(records)
+                    onDataChange(records.sortedByDescending { it.date })
                 }
 
                 override fun onCancelled(error: DatabaseError) {}

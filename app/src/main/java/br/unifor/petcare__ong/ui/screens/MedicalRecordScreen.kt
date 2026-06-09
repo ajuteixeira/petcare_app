@@ -127,7 +127,7 @@ fun MedicalRecordScreen(
                         titleColor = darkBlue,
                         subtitleColor = grayText,
                         onEdit = {
-                            navController.navigate(Routes.NewRecord.createRoute(animalId, record.id))
+                            navController.navigate(Routes.EditRecord.createRoute(animalId, record.id))
                         },
                         onDelete = {
                             viewModel.deleteRecord(animalId, record.id) {
@@ -177,7 +177,7 @@ fun RecordItem(
         "VACINA" -> Color(0xFF5C6BC0)
         "CONSULTA" -> Color(0xFF00BFA5)
         "TRATAMENTO" -> Color(0xFFFFA726)
-        else -> Color(0xFF707B81)
+        else -> Color(0xFF78909C)
     }
 
     Card(
@@ -223,7 +223,7 @@ fun RecordItem(
                         IconButton(onClick = onEdit, modifier = Modifier.size(24.dp)) {
                             Icon(
                                 imageVector = Icons.Outlined.Edit,
-                                contentDescription = null,
+                                contentDescription = "Editar",
                                 tint = Color.LightGray,
                                 modifier = Modifier.size(18.dp)
                             )
@@ -231,7 +231,7 @@ fun RecordItem(
                         IconButton(onClick = onDelete, modifier = Modifier.size(24.dp)) {
                             Icon(
                                 imageVector = Icons.Outlined.Delete,
-                                contentDescription = null,
+                                contentDescription = "Excluir",
                                 tint = Color.LightGray,
                                 modifier = Modifier.size(18.dp)
                             )
@@ -247,9 +247,9 @@ fun RecordItem(
                     fontWeight = FontWeight.Bold,
                     color = titleColor
                 )
-                if (record.professional.isNotEmpty()) {
+                if (!record.veterinarian.isNullOrEmpty()) {
                     Text(
-                        text = "Profissional: ${record.professional}",
+                        text = "Profissional: ${record.veterinarian}",
                         fontSize = 13.sp,
                         color = subtitleColor
                     )
