@@ -6,7 +6,7 @@ import br.unifor.petcare__ong.model.Movement
 import br.unifor.petcare__ong.BuildConfig
 
 class AiRepository {
-    private val apiKey = BuildConfig.GEMINI_API_KEY
+    private val apiKey = BuildConfig.DEIGEMINI_API_KEY
     
     private val generativeModel = GenerativeModel(
         modelName = "gemini-3.1-flash-lite-preview",

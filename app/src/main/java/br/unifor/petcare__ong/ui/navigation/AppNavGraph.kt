@@ -47,12 +47,20 @@ fun AppNavGraph() {
             AddAnimalScreen(navController, animalId)
         }
 
-        composable(Routes.MedicalRecord.route) {
-            MedicalRecordScreen(navController)
+        composable(Routes.MedicalRecord.route) { backStackEntry ->
+            val animalId = backStackEntry.arguments?.getString("animalId") ?: ""
+            MedicalRecordScreen(navController, animalId)
         }
 
-        composable(Routes.NewRecord.route) {
-            NewRecordScreen(navController)
+        composable(Routes.NewRecord.route) { backStackEntry ->
+            val animalId = backStackEntry.arguments?.getString("animalId") ?: ""
+            NewRecordScreen(navController, animalId)
+        }
+
+        composable(Routes.EditRecord.route) { backStackEntry ->
+            val animalId = backStackEntry.arguments?.getString("animalId") ?: ""
+            val recordId = backStackEntry.arguments?.getString("recordId") ?: ""
+            NewRecordScreen(navController, animalId, recordId)
         }
 
         composable(Routes.MovementHistory.route) { backStackEntry ->

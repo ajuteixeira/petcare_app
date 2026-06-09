@@ -321,7 +321,7 @@ fun AnimalProfileScreen(navController: NavController, animalId: String) {
                         icon = Icons.Default.Timeline,
                         containerColor = tealPrimary,
                         onClick = {
-                            navController.navigate(Routes.MedicalRecord.route)
+                            navController.navigate(Routes.MedicalRecord.createRoute(animalId))
                         }
                     )
                 }
