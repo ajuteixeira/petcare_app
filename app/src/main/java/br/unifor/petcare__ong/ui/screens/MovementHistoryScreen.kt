@@ -174,6 +174,11 @@ fun MovementItemCard(
     onDelete: () -> Unit
 ) {
     val statusColors = getStatusColors(movement.status)
+    
+    val entradaOptions = listOf("Resgate", "Abandono", "Devolução", "Transferência")
+    val isEntrada = entradaOptions.contains(movement.type)
+    val category = if (isEntrada) "ENTRADA" else "SAÍDA"
+    val categoryColor = if (isEntrada) Color(0xFF4CAF50) else Color(0xFFF44336)
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -188,12 +193,20 @@ fun MovementItemCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = movement.type,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        color = titleColor
-                    )
+                    Column {
+                        Text(
+                            text = movement.type,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp,
+                            color = titleColor
+                        )
+                        Text(
+                            text = category,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = categoryColor
+                        )
+                    }
                     Spacer(modifier = Modifier.width(12.dp))
                     Surface(
                         color = statusColors.second,
@@ -233,7 +246,7 @@ fun MovementItemCard(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Saída do abrigo: ${movement.startDateTime}",
+                text = "Início: ${movement.startDateTime}",
                 fontSize = 12.sp,
                 color = Color.LightGray,
                 fontWeight = FontWeight.Medium
@@ -241,7 +254,7 @@ fun MovementItemCard(
 
             if (movement.endDateTime.isNotEmpty()) {
                 Text(
-                    text = "Retorno ao abrigo: ${movement.endDateTime}",
+                    text = "Fim: ${movement.endDateTime}",
                     fontSize = 12.sp,
                     color = Color.LightGray,
                     fontWeight = FontWeight.Medium
