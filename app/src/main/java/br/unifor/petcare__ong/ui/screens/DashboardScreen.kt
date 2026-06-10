@@ -7,7 +7,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -98,7 +98,22 @@ fun DashboardScreen(navController: NavController, viewModel: DashboardViewModel 
                 }
 
                 // Adoptions and Entries Card
-                AdoptionsCard(darkBlue, grayText)
+                AdoptionsCard(
+                    entries = state.entriesLast30Days,
+                    adoptions = state.adoptionsLast30Days,
+                    deaths = state.deathsLast30Days,
+                    darkBlue = darkBlue,
+                    grayText = grayText
+                )
+
+                // Outside Shelter Card
+                if (state.outsideBreakdown.isNotEmpty()) {
+                    OutsideShelterCard(
+                        breakdown = state.outsideBreakdown,
+                        darkBlue = darkBlue,
+                        grayText = grayText
+                    )
+                }
 
                 // Population by Species Card
                 PopulationCard(state.dogsCount, state.dogsPercentage, state.catsCount, state.catsPercentage, darkBlue, grayText, tealPrimary)
@@ -131,7 +146,7 @@ fun MainTotalCard(total: String, tealColor: Color) {
                     color = Color.White
                 )
                 Text(
-                    text = "Total de Animais na ONG",
+                    text = "Total de Animais Cadastrados",
                     fontSize = 14.sp,
                     color = Color.White.copy(alpha = 0.8f),
                     fontWeight = FontWeight.Medium
@@ -209,7 +224,7 @@ fun StatCard(
 }
 
 @Composable
-fun AdoptionsCard(darkBlue: Color, grayText: Color) {
+fun AdoptionsCard(entries: Int, adoptions: Int, deaths: Int, darkBlue: Color, grayText: Color) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
@@ -219,24 +234,66 @@ fun AdoptionsCard(darkBlue: Color, grayText: Color) {
         Column(modifier = Modifier.padding(20.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                    imageVector = Icons.Default.TrendingUp,
+                    imageVector = Icons.AutoMirrored.Filled.TrendingUp,
                     contentDescription = null,
                     tint = Color(0xFF00BFA5),
                     modifier = Modifier.size(20.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Adoções e Entradas",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
-                    color = darkBlue
-                )
+                Column {
+                    Text(
+                        text = "Movimentações",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        color = darkBlue
+                    )
+                    Text(
+                        text = "Últimos 30 dias",
+                        fontSize = 12.sp,
+                        color = grayText
+                    )
+                }
             }
             Spacer(modifier = Modifier.height(20.dp))
             
-            MetricRow("Entradas (Maio)", "+12", Color(0xFF00BFA5))
-            MetricRow("Adoções (Maio)", "+8", Color(0xFF5C6BC0))
-            MetricRow("Óbitos (Maio)", "-1", Color(0xFFE57373))
+            MetricRow("Entradas", "+$entries", Color(0xFF00BFA5))
+            MetricRow("Adoções", "+$adoptions", Color(0xFF5C6BC0))
+            MetricRow("Óbitos", "-$deaths", Color(0xFFE57373))
+        }
+    }
+}
+
+@Composable
+fun OutsideShelterCard(breakdown: Map<String, Int>, darkBlue: Color, grayText: Color) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(2.dp)
+    ) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                    contentDescription = null,
+                    tint = Color(0xFF5C6BC0),
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Column {
+                    Text(
+                        text = "Fora do Abrigo",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        color = darkBlue
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(20.dp))
+            
+            breakdown.forEach { (type, count) ->
+                MetricRow(type, count.toString(), Color(0xFF5C6BC0))
+            }
         }
     }
 }
