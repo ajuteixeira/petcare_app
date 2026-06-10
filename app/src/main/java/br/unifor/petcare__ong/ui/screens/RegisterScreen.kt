@@ -17,16 +17,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import android.widget.Toast
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.lifecycle.viewmodel.compose.viewModel
 import br.unifor.petcare__ong.ui.navigation.Routes
+import br.unifor.petcare__ong.ui.viewmodel.RegisterViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen(navController: NavController) {
 
-    val authRepository = AuthRepository()
     val context = LocalContext.current
+    val viewModel: RegisterViewModel = viewModel()
+
 
     var nome by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -42,6 +49,18 @@ fun RegisterScreen(navController: NavController) {
     val lightGrayText = Color(0xFF707B81)
     val inputBackground = Color(0xFFF7F8F9)
     val inputBorder = Color(0xFFE8ECF4)
+
+    if (viewModel.sucessoCadastro) {
+        LaunchedEffect(Unit) {
+            Toast.makeText(context, "Cadastro realizado!", Toast.LENGTH_SHORT).show()
+            navController.navigate(Routes.Login.route) {
+                popUpTo(Routes.Register.route) {
+                    inclusive = true
+                }
+            }
+            viewModel.resetarCadastro()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -79,8 +98,9 @@ fun RegisterScreen(navController: NavController) {
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 16.dp),
+                    .fillMaxSize()
+                    .padding(horizontal = 24.dp, vertical = 16.dp)
+                    .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 // Card Principal
@@ -99,7 +119,8 @@ fun RegisterScreen(navController: NavController) {
                             text = "Crie sua conta para gerenciar os animais da ONG.",
                             fontSize = 14.sp,
                             color = lightGrayText,
-                            modifier = Modifier.padding(bottom = 8.dp)
+                            modifier = Modifier.padding(bottom = 8.dp),
+
                         )
 
                         // Reutilização da estrutura de campo
@@ -110,7 +131,8 @@ fun RegisterScreen(navController: NavController) {
                             placeholder = "Digite seu nome",
                             labelColor = darkBlue,
                             containerColor = inputBackground,
-                            borderColor = inputBorder
+                            borderColor = inputBorder,
+                            erro = viewModel.erroNome
                         )
 
                         RegistrationField(
@@ -120,7 +142,8 @@ fun RegisterScreen(navController: NavController) {
                             placeholder = "seu@email.com",
                             labelColor = darkBlue,
                             containerColor = inputBackground,
-                            borderColor = inputBorder
+                            borderColor = inputBorder,
+                            erro = viewModel.erroEmail
                         )
 
                         RegistrationField(
@@ -130,7 +153,9 @@ fun RegisterScreen(navController: NavController) {
                             placeholder = "********",
                             labelColor = darkBlue,
                             containerColor = inputBackground,
-                            borderColor = inputBorder
+                            borderColor = inputBorder,
+                            erro = viewModel.erroSenha,
+                            isPassword = true
                         )
 
                         RegistrationField(
@@ -140,52 +165,18 @@ fun RegisterScreen(navController: NavController) {
                             placeholder = "********",
                             labelColor = darkBlue,
                             containerColor = inputBackground,
-                            borderColor = inputBorder
+                            borderColor = inputBorder,
+                            erro = viewModel.erroConfirmarSenha,
+                            isPassword = true
                         )
 
                         Spacer(modifier = Modifier.height(8.dp))
 
                         // Botão Criar Conta
                         Button(
-                            onClick = {    // logica de auth
 
-                                if (senha != confirmarSenha) {
-
-                                    Toast.makeText(
-                                        context,
-                                        "As senhas não coincidem",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-
-                                    return@Button
-                                }
-
-                                authRepository.cadastrar(
-                                    email,
-                                    senha
-                                ) { sucesso, erro ->
-
-                                    if (sucesso) {
-
-                                        Toast.makeText(
-                                            context,
-                                            "Conta criada com sucesso!",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-
-                                        navController.navigate(
-                                            Routes.Login.route
-                                        )
-
-                                    } else {
-
-                                        Toast.makeText(
-                                            context,
-                                            erro ?: "Erro ao cadastrar",
-                                            Toast.LENGTH_LONG
-                                        ).show()
-                                    }
-                                }
+                            onClick = {
+                                viewModel.registrar(nome, email, senha, confirmarSenha)
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -201,6 +192,14 @@ fun RegisterScreen(navController: NavController) {
                                 fontSize = 16.sp
                             )
                         }
+                        viewModel.erroGeral?.let {
+                            Text(
+                                text = it,
+                                color = Color.Red,
+                                fontSize = 12.sp
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(250.dp))
                     }
                 }
             }
@@ -215,7 +214,9 @@ fun RegistrationField(
     placeholder: String,
     labelColor: Color,
     containerColor: Color,
-    borderColor: Color
+    borderColor: Color,
+    erro: String? = null,
+    isPassword: Boolean = false
 ) {
     Column {
         Text(
@@ -233,11 +234,24 @@ fun RegistrationField(
             placeholder = { Text(placeholder) },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
+            isError = erro != null,
+            visualTransformation =
+                if (isPassword)
+                    PasswordVisualTransformation()
+                else
+                    VisualTransformation.None,
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = containerColor,
                 unfocusedContainerColor = containerColor,
                 unfocusedBorderColor = borderColor
             )
         )
+        if (erro != null) {
+            Text(
+                text = erro,
+                color = Color.Red,
+                fontSize = 12.sp
+            )
+        }
     }
 }

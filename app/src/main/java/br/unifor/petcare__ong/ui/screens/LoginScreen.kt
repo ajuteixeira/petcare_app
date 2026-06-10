@@ -5,7 +5,10 @@ import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -18,18 +21,22 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import br.unifor.petcare__ong.ui.navigation.Routes
+import br.unifor.petcare__ong.ui.viewmodel.LoginViewModel
 
 @Composable
 fun LoginScreen(navController: NavController) {
-    val authRepository = AuthRepository()
+
     val context = LocalContext.current
     var email by remember { mutableStateOf("") }
     var senha by remember { mutableStateOf("") }
+    val viewModel: LoginViewModel = viewModel()
 
 
     // Cores baseadas na imagem
@@ -43,15 +50,21 @@ fun LoginScreen(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(brush = backgroundGradient),
-        contentAlignment = Alignment.Center
+            .background(brush = backgroundGradient)
     ) {
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxSize()
+                .fillMaxHeight()
+                .padding(horizontal = 32.dp)
+                .verticalScroll(rememberScrollState())
+                .imePadding()
+                .align(Alignment.Center),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            Spacer(modifier = Modifier.height(80.dp))
+
             // Logotipo (Simulado com uma Box branca e ícone)
             Card(
                 shape = RoundedCornerShape(24.dp),
@@ -59,7 +72,10 @@ fun LoginScreen(navController: NavController) {
                 colors = CardDefaults.cardColors(containerColor = Color.White),
                 modifier = Modifier.size(100.dp)
             ) {
-                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.fillMaxSize()
+                ) {
                     Text(text = "🐾", fontSize = 40.sp) // Representação do ícone de patas
                 }
             }
@@ -120,6 +136,7 @@ fun LoginScreen(navController: NavController) {
                             placeholder = { Text("********", color = Color.LightGray) },
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(12.dp),
+                            visualTransformation = PasswordVisualTransformation(),
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedContainerColor = Color(0xFFF7F8F9),
                                 unfocusedContainerColor = Color(0xFFF7F8F9),
@@ -132,35 +149,37 @@ fun LoginScreen(navController: NavController) {
 
                     // Botão Entrar
                     Button(
-                        onClick = {    // logica de auth
+                        onClick = {
 
-                            authRepository.login(
-                                email,
-                                senha
-                            ) { sucesso, erro ->
+                            if (!viewModel.validar(email, senha)) return@Button
+
+                            viewModel.login(email, senha) { sucesso, erro ->
 
                                 if (sucesso) {
-
-                                    Toast.makeText(   // pesquisar
-                                        context,
-                                        "Login realizado com sucesso!",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-
-                                    navController.navigate(Routes.Dashboard.route)
-
+                                    navController.navigate(Routes.Dashboard.route) {
+                                        popUpTo(Routes.Login.route) {
+                                            inclusive = true
+                                        }
+                                    }
                                 } else {
-
-                                    Toast.makeText(
-                                        context,
-                                        erro ?: "Erro ao fazer login",
-                                        Toast.LENGTH_LONG
-                                    ).show()
+                                    viewModel.definirErro(
+                                        erro ?: "Email ou senha incorretos")
                                 }
                             }
-                        }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp)
                     ){
                         Text("Entrar", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    }
+
+                    viewModel.erroLogin?.let {
+                        Text(
+                            text = it,
+                            color = Color.Red,
+                            fontSize = 12.sp
+                        )
                     }
 
                     // Link de Cadastro
