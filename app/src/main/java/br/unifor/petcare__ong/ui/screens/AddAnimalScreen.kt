@@ -15,6 +15,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,15 +29,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import br.unifor.petcare__ong.data.AnimalRepository
 import br.unifor.petcare__ong.model.Animal
 import br.unifor.petcare__ong.ui.components.AppBottomBar
 import br.unifor.petcare__ong.ui.navigation.Routes
 import coil.compose.AsyncImage
 
+import androidx.lifecycle.viewmodel.compose.viewModel
+import br.unifor.petcare__ong.ui.viewmodel.AnimalViewModel
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddAnimalScreen(navController: NavController, animalId: String? = null) {
+fun AddAnimalScreen(
+    navController: NavController, 
+    animalId: String? = null,
+    viewModel: AnimalViewModel = viewModel()
+) {
     val darkBlue = Color(0xFF0D1B3E)
     val tealPrimary = Color(0xFF009688)
     val grayText = Color(0xFF707B81)
@@ -44,7 +51,6 @@ fun AddAnimalScreen(navController: NavController, animalId: String? = null) {
     val inputBorderColor = Color(0xFFE0E0E0)
 
     val context = LocalContext.current
-    val repository = remember { AnimalRepository() }
     val isEditing = animalId != null
 
     var nome by remember { mutableStateOf("") }
@@ -59,6 +65,8 @@ fun AddAnimalScreen(navController: NavController, animalId: String? = null) {
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     var existingFotoUrl by remember { mutableStateOf<String?>(null) }
 
+    val animalSelecionado by viewModel.animalSelecionado.collectAsState()
+
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -66,21 +74,23 @@ fun AddAnimalScreen(navController: NavController, animalId: String? = null) {
     }
 
     LaunchedEffect(animalId) {
-        if (isEditing) {
-            repository.buscarAnimalPorId(animalId!!) { animal ->
-                animal?.let {
-                    nome = it.nome
-                    especie = it.especie
-                    raca = it.raca
-                    idade = it.idade
-                    sexo = it.sexo
-                    porte = it.porte
-                    comportamento = it.comportamento
-                    status = it.status
-                    descricao = it.descricao
-                    existingFotoUrl = it.fotoUrl
-                }
-            }
+        if (isEditing && animalId != null) {
+            viewModel.buscarAnimalPorId(animalId)
+        }
+    }
+
+    LaunchedEffect(animalSelecionado) {
+        animalSelecionado?.let {
+            nome = it.nome
+            especie = it.especie
+            raca = it.raca
+            idade = it.idade
+            sexo = it.sexo
+            porte = it.porte
+            comportamento = it.comportamento
+            status = it.status
+            descricao = it.descricao
+            existingFotoUrl = it.fotoUrl
         }
     }
 
@@ -210,7 +220,7 @@ fun AddAnimalScreen(navController: NavController, animalId: String? = null) {
                         if (isEditing) {
                             FormDropdown(
                                 label = "Status",
-                                options = listOf("Disponível", "Em Tratamento", "Adotado"),
+                                options = listOf("Disponível", "Em Tratamento", "Adotado", "Falecido"),
                                 selectedOption = status,
                                 onOptionSelected = { status = it },
                                 labelColor = darkBlue,
@@ -277,18 +287,18 @@ fun AddAnimalScreen(navController: NavController, animalId: String? = null) {
                                     )
 
                                     if (isEditing) {
-                                        repository.atualizarAnimal(
+                                        viewModel.atualizarAnimal(
                                             animal = animalToSave,
                                             onSuccess = {
                                                 Toast.makeText(context, "Animal atualizado!", Toast.LENGTH_SHORT).show()
                                                 navController.popBackStack()
                                             },
-                                            onFailure = {
-                                                Toast.makeText(context, "Erro: ${it.message}", Toast.LENGTH_SHORT).show()
+                                            onFailure = { e ->
+                                                Toast.makeText(context, "Erro: ${e.message}", Toast.LENGTH_SHORT).show()
                                             }
                                         )
                                     } else {
-                                        repository.salvarAnimal(
+                                        viewModel.salvarAnimal(
                                             animal = animalToSave,
                                             onSuccess = {
                                                 Toast.makeText(context, "Animal cadastrado!", Toast.LENGTH_SHORT).show()
@@ -296,8 +306,8 @@ fun AddAnimalScreen(navController: NavController, animalId: String? = null) {
                                                     popUpTo(Routes.AddAnimal.route) { inclusive = true }
                                                 }
                                             },
-                                            onFailure = {
-                                                Toast.makeText(context, "Erro: ${it.message}", Toast.LENGTH_SHORT).show()
+                                            onFailure = { e ->
+                                                Toast.makeText(context, "Erro: ${e.message}", Toast.LENGTH_SHORT).show()
                                             }
                                         )
                                     }

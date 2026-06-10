@@ -10,37 +10,38 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import br.unifor.petcare__ong.data.AnimalRepository
 import br.unifor.petcare__ong.model.Animal
 import br.unifor.petcare__ong.ui.components.AppBottomBar
 import br.unifor.petcare__ong.ui.navigation.Routes
 import coil.compose.AsyncImage
 
+import androidx.lifecycle.viewmodel.compose.viewModel
+import br.unifor.petcare__ong.ui.viewmodel.AnimalViewModel
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AnimalListScreen(navController: NavController) {
+fun AnimalListScreen(navController: NavController, viewModel: AnimalViewModel = viewModel()) {
     val darkBlue = Color(0xFF0D1B3E)
     val grayText = Color(0xFF707B81)
     val tealPrimary = Color(0xFF009688)
 
-    val repository = remember { AnimalRepository() }
-    var animals by remember { mutableStateOf(listOf<Animal>()) }
-    var isLoading by remember { mutableStateOf(true) }
+    val animals by viewModel.animais.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
 
     LaunchedEffect(Unit) {
-        repository.listarAnimais { list ->
-            animals = list
-            isLoading = false
-        }
+        viewModel.listarAnimais()
     }
 
     Scaffold(
@@ -132,7 +133,10 @@ fun AnimalItemCard(
                         model = animal.fotoUrl,
                         contentDescription = null,
                         modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
+                        contentScale = ContentScale.Crop,
+                        colorFilter = if (animal.status == "Falecido") {
+                            ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) })
+                        } else null
                     )
                 } else {
                     Text(

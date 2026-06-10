@@ -13,11 +13,14 @@ import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -27,16 +30,22 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import br.unifor.petcare__ong.data.AiRepository
 import br.unifor.petcare__ong.data.MovementRepository
-import br.unifor.petcare__ong.data.AnimalRepository
 import br.unifor.petcare__ong.data.MedicalRecordRepository
 import br.unifor.petcare__ong.model.Animal
 import br.unifor.petcare__ong.ui.navigation.Routes
 import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
 
+import androidx.lifecycle.viewmodel.compose.viewModel
+import br.unifor.petcare__ong.ui.viewmodel.AnimalViewModel
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AnimalProfileScreen(navController: NavController, animalId: String) {
+fun AnimalProfileScreen(
+    navController: NavController, 
+    animalId: String,
+    viewModel: AnimalViewModel = viewModel()
+) {
     val darkBlue = Color(0xFF0D1B3E)
     val tealPrimary = Color(0xFF009688)
     val grayText = Color(0xFF707B81)
@@ -44,24 +53,59 @@ fun AnimalProfileScreen(navController: NavController, animalId: String) {
     val deleteRed = Color(0xFFFF2D55)
 
     val context = LocalContext.current
-    val repository = remember { AnimalRepository() }
     val aiRepository = remember { AiRepository() }
     val movementRepository = remember { MovementRepository() }
     val medicalRecordRepository = remember { MedicalRecordRepository() }
     val scope = rememberCoroutineScope()
 
-    var animal by remember { mutableStateOf<Animal?>(null) }
-    var isLoading by remember { mutableStateOf(true) }
+    val animal by viewModel.animalSelecionado.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
     
     var aiDescription by remember { mutableStateOf("") }
     var isGenerating by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(animalId) {
-        repository.buscarAnimalPorId(animalId) { result ->
-            animal = result
-            aiDescription = result?.descricao ?: ""
-            isLoading = false
+        viewModel.buscarAnimalPorId(animalId)
+    }
+
+    LaunchedEffect(animal) {
+        animal?.let {
+            aiDescription = it.descricao
         }
+    }
+
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Confirmar Exclusão") },
+            text = { Text("Tem certeza que deseja excluir este animal? Esta ação não poderá ser desfeita.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteDialog = false
+                        viewModel.deletarAnimal(
+                            id = animalId,
+                            onSuccess = {
+                                Toast.makeText(context, "Animal excluído!", Toast.LENGTH_SHORT).show()
+                                navController.popBackStack()
+                            },
+                            onFailure = { e ->
+                                Toast.makeText(context, "Erro ao excluir: ${e.message}", Toast.LENGTH_SHORT).show()
+                            }
+                        )
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = deleteRed)
+                ) {
+                    Text("Excluir", fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text("Cancelar", color = darkBlue)
+                }
+            }
+        )
     }
 
     Scaffold(
@@ -131,7 +175,10 @@ fun AnimalProfileScreen(navController: NavController, animalId: String) {
                                         model = animal?.fotoUrl,
                                         contentDescription = null,
                                         modifier = Modifier.fillMaxSize(),
-                                        contentScale = ContentScale.Crop
+                                        contentScale = ContentScale.Crop,
+                                        colorFilter = if (animal?.status == "Falecido") {
+                                            ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) })
+                                        } else null
                                     )
                                 } else {
                                     Icon(
@@ -214,14 +261,14 @@ fun AnimalProfileScreen(navController: NavController, animalId: String) {
                                                                     )
                                                                     if (result != null) {
                                                                         aiDescription = result
-                                                                        repository.atualizarDescricao(
+                                                                        viewModel.atualizarDescricao(
                                                                             id = animalId,
                                                                             descricao = result,
                                                                             onSuccess = {
                                                                                 Toast.makeText(context, "Descrição salva!", Toast.LENGTH_SHORT).show()
                                                                             },
-                                                                            onFailure = {
-                                                                                Toast.makeText(context, "Erro ao salvar: ${it.message}", Toast.LENGTH_SHORT).show()
+                                                                            onFailure = { e ->
+                                                                                Toast.makeText(context, "Erro ao salvar: ${e.message}", Toast.LENGTH_SHORT).show()
                                                                             }
                                                                         )
                                                                     } else {
@@ -293,18 +340,7 @@ fun AnimalProfileScreen(navController: NavController, animalId: String) {
                             }
                         }
                         Button(
-                            onClick = { 
-                                repository.deletarAnimal(
-                                    id = animalId,
-                                    onSuccess = {
-                                        Toast.makeText(context, "Animal excluído!", Toast.LENGTH_SHORT).show()
-                                        navController.popBackStack()
-                                    },
-                                    onFailure = {
-                                        Toast.makeText(context, "Erro ao excluir: ${it.message}", Toast.LENGTH_SHORT).show()
-                                    }
-                                )
-                            },
+                            onClick = { showDeleteDialog = true },
                             modifier = Modifier
                                 .weight(1f)
                                 .height(50.dp),

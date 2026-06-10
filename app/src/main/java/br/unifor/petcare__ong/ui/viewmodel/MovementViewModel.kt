@@ -50,7 +50,18 @@ class MovementViewModel : ViewModel() {
         onSuccess: () -> Unit,
         onFailure: (Exception) -> Unit
     ) {
-        movementRepository.saveMovement(animalId, movement, onSuccess, onFailure)
+        movementRepository.saveMovement(animalId, movement, {
+            if (movement.type == "Óbito") {
+                animalRepository.buscarAnimalPorId(animalId) { animal ->
+                    animal?.let {
+                        val updatedAnimal = it.copy(status = "Falecido")
+                        animalRepository.atualizarAnimal(updatedAnimal, onSuccess, onFailure)
+                    } ?: onSuccess()
+                }
+            } else {
+                onSuccess()
+            }
+        }, onFailure)
     }
 
     fun deleteMovement(animalId: String, movementId: String) {
