@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "436274644093",
+    "project_id": "petcare-ong",
+    "storage_bucket": "petcare-ong.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:436274644093:android:cd71e2ce5664e0551b9d14",
+        "android_client_info": {
+          "package_name": "br.unifor.petcare__ong"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDOjDh_bY3eS9f15Y-BlZspe_IvApS7MSw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
