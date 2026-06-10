@@ -1,7 +1,5 @@
 package br.unifor.petcare__ong.model
 
-// Importa a anotação que permite mapear os nomes dos campos
-// corretamente entre o Kotlin e o Firebase.
 import com.google.firebase.database.PropertyName
 
 // Data class utilizada para representar um registro médico do animal.
