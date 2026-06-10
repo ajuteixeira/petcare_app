@@ -30,21 +30,20 @@ class AiRepository {
         }
         
         val prompt = """
-            Crie um resumo geral, curto e objetivo para este animal.
-            O objetivo é consolidar as informações existentes de forma organizada e gentil.
+            Crie um resumo geral, curto e objetivo para este animal em formato de TEXTO CORRIDO e amigável.
+            O objetivo é consolidar as informações existentes de forma organizada em parágrafos, seguindo estritamente esta ordem:
             
-            Apresente as características principais: nome, idade, raça e comportamento.
+            1. No primeiro parágrafo, apresente o PERFIL: características principais como nome, idade, raça e comportamento.
+            
+            2. No segundo parágrafo, apresente a SAÚDE: um resumo das informações médicas mais relevantes do prontuário (vacinas, consultas, tratamentos), destacando condições atuais ou observações importantes.
+            
+            3. No terceiro parágrafo, apresente a ÚLTIMA MOVIMENTAÇÃO registrada (baseando-se na data mais recente), mencionando:
+            - O tipo da movimentação (ex: passeio, consulta, cirurgia, lar temporário, óbito, etc).
+            - A data e hora em que ocorreu ou ocorrerá.
+            - O status atual (se está agendada, em andamento ou se já foi concluída). 
+            - EXCEÇÃO CRÍTICA: Se a movimentação for do tipo "Óbito", informe apenas a data, NUNCA o status.
             
             ATENÇÃO AO GÊNERO: O animal é do sexo ${animal.sexo}. Use obrigatoriamente os artigos e pronomes corretos (ele/ela, o/a).
-            
-            INFORMAÇÃO DE MOVIMENTAÇÃO: 
-            Você DEVE informar qual foi a última movimentação registrada do animal (baseando-se na data mais recente), mencionando:
-            - O tipo da movimentação (ex: passeio, consulta, cirurgia, lar temporário, etc).
-            - A data e hora em que ocorreu ou ocorrerá.
-            - O status atual (se está agendada, em andamento ou se já foi concluída).
-
-            INFORMAÇÃO DE SAÚDE E PRONTUÁRIO:
-            Você DEVE incluir um resumo das informações médicas mais relevantes (vacinas, consultas, tratamentos), destacando condições de saúde atuais ou observações importantes presentes no prontuário.
 
             FONTES DE INFORMAÇÃO (PROIBIDO INVENTAR DADOS):
             1. PERFIL DO ANIMAL:
@@ -66,8 +65,8 @@ class AiRepository {
             1. Baseie-se EXCLUSIVAMENTE nas fontes fornecidas. Não adicione informações externas ou fictícias.
             2. Não tente convencer ninguém à adoção.
             3. O tom deve ser informativo e amigável.
-            4. FORMATO: Responda APENAS com o texto final do resumo em formato de TEXTO CORRIDO (parágrafos normais). 
-            5. PROIBIÇÕES DE FORMATAÇÃO: É PROIBIDO o uso de Markdown, asteriscos (**), listas com marcadores (bullets) ou cabeçalhos.
+            4. FORMATO: Responda APENAS com o texto final do resumo em formato de TEXTO CORRIDO, dividido em parágrafos.
+            5. PROIBIÇÕES DE FORMATAÇÃO: É TERMINANTEMENTE PROIBIDO o uso de tópicos, listas com marcadores (bullets), Markdown, asteriscos (**), cabeçalhos ou rótulos (como "Perfil:", "Saúde:", etc.). Escreva apenas o texto corrido.
             6. Idioma: Português.
         """.trimIndent()
 
