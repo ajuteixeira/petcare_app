@@ -35,6 +35,7 @@ import br.unifor.petcare__ong.ui.navigation.Routes
 import coil.compose.AsyncImage
 
 import androidx.lifecycle.viewmodel.compose.viewModel
+import br.unifor.petcare__ong.ui.session.SessionManager
 import br.unifor.petcare__ong.ui.viewmodel.AnimalViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -119,7 +120,8 @@ fun AddAnimalScreen(
             if (!isEditing) {
                 AppBottomBar(
                     navController = navController,
-                    currentRoute = Routes.AddAnimal.route
+                    currentRoute = Routes.AddAnimal.route,
+                    tipoUsuario = SessionManager.tipoUsuario
                 )
             }
         },

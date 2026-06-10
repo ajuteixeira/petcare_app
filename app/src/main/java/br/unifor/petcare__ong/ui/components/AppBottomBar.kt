@@ -16,7 +16,8 @@ import br.unifor.petcare__ong.ui.navigation.Routes
 @Composable
 fun AppBottomBar(
     navController: NavController,
-    currentRoute: String
+    currentRoute: String,
+    tipoUsuario: String
 ) {
 
     val tealPrimary = Color(0xFF009688)
@@ -26,6 +27,7 @@ fun AppBottomBar(
         tonalElevation = 8.dp
     ) {
 
+        // Animais (todos)
         NavigationBarItem(
             icon = { Icon(Icons.Default.Home, null) },
             label = { Text("Animais", fontSize = 10.sp) },
@@ -35,24 +37,31 @@ fun AppBottomBar(
             }
         )
 
-        NavigationBarItem(
-            icon = { Icon(Icons.Default.BarChart, null) },
-            label = { Text("Dashboard", fontSize = 10.sp) },
-            selected = currentRoute == Routes.Dashboard.route,
-            onClick = {
-                navController.navigate(Routes.Dashboard.route)
-            }
-        )
+        // Dashboard (somente gestor)
+        if (tipoUsuario == "GESTOR") {
+            NavigationBarItem(
+                icon = { Icon(Icons.Default.BarChart, null) },
+                label = { Text("Dashboard", fontSize = 10.sp) },
+                selected = currentRoute == Routes.Dashboard.route,
+                onClick = {
+                    navController.navigate(Routes.Dashboard.route)
+                }
+            )
+        }
 
-        NavigationBarItem(
-            icon = { Icon(Icons.Default.FileDownload, null) },
-            label = { Text("Exportar", fontSize = 10.sp) },
-            selected = currentRoute == Routes.ExportReports.route,
-            onClick = {
-                navController.navigate(Routes.ExportReports.route)
-            }
-        )
+        // Exportar (somente gestor)
+        if (tipoUsuario == "GESTOR") {
+            NavigationBarItem(
+                icon = { Icon(Icons.Default.FileDownload, null) },
+                label = { Text("Exportar", fontSize = 10.sp) },
+                selected = currentRoute == Routes.ExportReports.route,
+                onClick = {
+                    navController.navigate(Routes.ExportReports.route)
+                }
+            )
+        }
 
+        // Adicionar (todos)
         NavigationBarItem(
             icon = { Icon(Icons.Default.AddCircleOutline, null) },
             label = { Text("Adicionar", fontSize = 10.sp) },

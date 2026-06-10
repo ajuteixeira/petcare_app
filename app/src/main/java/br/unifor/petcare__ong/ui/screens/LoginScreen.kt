@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import br.unifor.petcare__ong.ui.navigation.Routes
+import br.unifor.petcare__ong.ui.session.SessionManager
 import br.unifor.petcare__ong.ui.viewmodel.LoginViewModel
 
 @Composable
@@ -156,14 +157,36 @@ fun LoginScreen(navController: NavController) {
                             viewModel.login(email, senha) { sucesso, erro ->
 
                                 if (sucesso) {
-                                    navController.navigate(Routes.Dashboard.route) {
-                                        popUpTo(Routes.Login.route) {
-                                            inclusive = true
+
+                                    viewModel.buscarTipoUsuario { tipo ->
+
+                                        SessionManager.tipoUsuario = tipo ?: "VOLUNTARIO"
+
+                                        if (tipo == "GESTOR") {
+
+                                            navController.navigate(Routes.Dashboard.route) {
+                                                popUpTo(Routes.Login.route) {
+                                                    inclusive = true
+                                                }
+                                            }
+
+                                        } else {
+
+                                            navController.navigate(Routes.AnimalList.route) {
+                                                popUpTo(Routes.Login.route) {
+                                                    inclusive = true
+                                                }
+                                            }
+
                                         }
                                     }
+
                                 } else {
+
                                     viewModel.definirErro(
-                                        erro ?: "Email ou senha incorretos")
+                                        erro ?: "Email ou senha incorretos"
+                                    )
+
                                 }
                             }
                         },
@@ -188,10 +211,10 @@ fun LoginScreen(navController: NavController) {
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable{
-                            navController.navigate(
-                                Routes.Register.route
-                            )
-                        },
+                                navController.navigate(
+                                    Routes.Register.route
+                                )
+                            },
                         textAlign = TextAlign.Center,
                         color = primaryTeal,
                         fontSize = 14.sp,

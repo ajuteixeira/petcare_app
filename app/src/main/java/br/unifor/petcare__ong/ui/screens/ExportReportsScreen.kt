@@ -14,6 +14,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,6 +30,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import br.unifor.petcare__ong.ui.components.AppBottomBar
 import br.unifor.petcare__ong.ui.navigation.Routes
+import br.unifor.petcare__ong.ui.session.SessionManager
 import br.unifor.petcare__ong.ui.viewmodel.ExportViewModel
 import br.unifor.petcare__ong.ui.viewmodel.ReportType
 import java.util.Calendar
@@ -42,6 +44,15 @@ fun ExportReportsScreen(navController: NavController, viewModel: ExportViewModel
     val tealPrimary = Color(0xFF009688)
     val grayText = Color(0xFF707B81)
     val lightBackground = Color(0xFFF8F9FA)
+
+    if (SessionManager.tipoUsuario != "GESTOR") {
+        LaunchedEffect(Unit) {
+            navController.navigate(Routes.AnimalList.route) {
+                popUpTo(Routes.ExportReports.route) { inclusive = true }
+            }
+        }
+        return
+    }
 
     Scaffold(
         topBar = {
@@ -69,7 +80,8 @@ fun ExportReportsScreen(navController: NavController, viewModel: ExportViewModel
         bottomBar = {
             AppBottomBar(
                 navController = navController,
-                currentRoute = Routes.ExportReports.route
+                currentRoute = Routes.ExportReports.route,
+                tipoUsuario = SessionManager.tipoUsuario
             )
         },
         containerColor = lightBackground

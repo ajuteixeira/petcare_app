@@ -39,6 +39,7 @@ fun RegisterScreen(navController: NavController) {
     var email by remember { mutableStateOf("") }
     var senha by remember { mutableStateOf("") }
     var confirmarSenha by remember { mutableStateOf("") }
+    var tipoUsuario by remember { mutableStateOf("VOLUNTARIO") }
 
     // Mesma paleta de cores da LoginScreen
     val backgroundGradient = Brush.verticalGradient(
@@ -121,7 +122,7 @@ fun RegisterScreen(navController: NavController) {
                             color = lightGrayText,
                             modifier = Modifier.padding(bottom = 8.dp),
 
-                        )
+                            )
 
                         // Reutilização da estrutura de campo
                         RegistrationField(
@@ -170,13 +171,42 @@ fun RegisterScreen(navController: NavController) {
                             isPassword = true
                         )
 
+                        Text(
+                            text = "Tipo de Usuário",
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+
+                            RadioButton(
+                                selected = tipoUsuario == "VOLUNTARIO",
+                                onClick = {
+                                    tipoUsuario = "VOLUNTARIO"
+                                }
+                            )
+
+                            Text("Voluntário")
+
+                            Spacer(modifier = Modifier.width(16.dp))
+
+                            RadioButton(
+                                selected = tipoUsuario == "GESTOR",
+                                onClick = { tipoUsuario = "GESTOR" }
+                            )
+
+                            Text("Gestor")
+                        }
+
+
                         Spacer(modifier = Modifier.height(8.dp))
 
                         // Botão Criar Conta
                         Button(
 
                             onClick = {
-                                viewModel.registrar(nome, email, senha, confirmarSenha)
+                                viewModel.registrar(nome, email, senha, confirmarSenha, tipoUsuario)
                             },
                             modifier = Modifier
                                 .fillMaxWidth()

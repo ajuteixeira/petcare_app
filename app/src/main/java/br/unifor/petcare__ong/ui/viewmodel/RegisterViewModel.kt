@@ -40,7 +40,8 @@ class RegisterViewModel : ViewModel() {
         nome: String,
         email: String,
         senha: String,
-        confirmar: String
+        confirmar: String,
+        tipoUsuario: String
     ) {
 
         sucessoCadastro = false
@@ -50,7 +51,7 @@ class RegisterViewModel : ViewModel() {
 
         if (!valido) return
 
-        AuthRepository().cadastrar(email, senha) { sucesso, erro ->
+        AuthRepository().cadastrar(nome, email, senha, tipoUsuario) { sucesso, erro ->
 
             if (sucesso) {
                 sucessoCadastro = true
