@@ -6,6 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 
 import br.unifor.petcare__ong.ui.screens.*
+import br.unifor.petcare__ong.ui.session.SessionManager
 
 @Composable
 fun AppNavGraph() {
@@ -26,7 +27,12 @@ fun AppNavGraph() {
         }
 
         composable(Routes.Dashboard.route) {
-            DashboardScreen(navController)
+
+            if (SessionManager.tipoUsuario == "GESTOR") {
+                DashboardScreen(navController)
+            } else {
+                navController.navigate(Routes.AnimalList.route)
+            }
         }
 
         composable(Routes.AnimalList.route) {
@@ -80,7 +86,11 @@ fun AppNavGraph() {
         }
 
         composable(Routes.ExportReports.route) {
-            ExportReportsScreen(navController)
+            if (SessionManager.tipoUsuario == "GESTOR") {
+                ExportReportsScreen(navController)
+            } else {
+                navController.navigate(Routes.AnimalList.route)
+            }
         }
     }
 }

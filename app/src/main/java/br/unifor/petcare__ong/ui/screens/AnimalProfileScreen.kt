@@ -42,6 +42,7 @@ import coil.request.SuccessResult
 import kotlinx.coroutines.launch
 
 import androidx.lifecycle.viewmodel.compose.viewModel
+import br.unifor.petcare__ong.ui.session.SessionManager
 import br.unifor.petcare__ong.ui.viewmodel.AnimalViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -65,7 +66,7 @@ fun AnimalProfileScreen(
 
     val animal by viewModel.animalSelecionado.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
-    
+
     var aiDescription by remember { mutableStateOf("") }
     var isGenerating by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -92,11 +93,16 @@ fun AnimalProfileScreen(
                         viewModel.deletarAnimal(
                             id = animalId,
                             onSuccess = {
-                                Toast.makeText(context, "Animal excluído!", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "Animal excluído!", Toast.LENGTH_SHORT)
+                                    .show()
                                 navController.popBackStack()
                             },
                             onFailure = { e ->
-                                Toast.makeText(context, "Erro ao excluir: ${e.message}", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    context,
+                                    "Erro ao excluir: ${e.message}",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                         )
                     },
@@ -182,7 +188,11 @@ fun AnimalProfileScreen(
                                         modifier = Modifier.fillMaxSize(),
                                         contentScale = ContentScale.Crop,
                                         colorFilter = if (animal?.status == "Falecido") {
-                                            ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) })
+                                            ColorFilter.colorMatrix(ColorMatrix().apply {
+                                                setToSaturation(
+                                                    0f
+                                                )
+                                            })
                                         } else null
                                     )
                                 } else {
@@ -209,7 +219,10 @@ fun AnimalProfileScreen(
                                 ) {
                                     Text(
                                         text = animal?.status?.uppercase() ?: "",
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                        modifier = Modifier.padding(
+                                            horizontal = 8.dp,
+                                            vertical = 4.dp
+                                        ),
                                         fontSize = 10.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = tealPrimary
@@ -217,20 +230,56 @@ fun AnimalProfileScreen(
                                 }
 
                                 Row(modifier = Modifier.fillMaxWidth()) {
-                                    DetailItem(label = "ESPÉCIE", value = animal?.especie ?: "", modifier = Modifier.weight(1f), grayText, darkBlue)
-                                    DetailItem(label = "RAÇA", value = animal?.raca ?: "", modifier = Modifier.weight(1f), grayText, darkBlue)
+                                    DetailItem(
+                                        label = "ESPÉCIE",
+                                        value = animal?.especie ?: "",
+                                        modifier = Modifier.weight(1f),
+                                        grayText,
+                                        darkBlue
+                                    )
+                                    DetailItem(
+                                        label = "RAÇA",
+                                        value = animal?.raca ?: "",
+                                        modifier = Modifier.weight(1f),
+                                        grayText,
+                                        darkBlue
+                                    )
                                 }
                                 Spacer(modifier = Modifier.height(16.dp))
                                 Row(modifier = Modifier.fillMaxWidth()) {
-                                    DetailItem(label = "IDADE", value = animal?.idade ?: "", modifier = Modifier.weight(1f), grayText, darkBlue)
-                                    DetailItem(label = "SEXO", value = animal?.sexo ?: "", modifier = Modifier.weight(1f), grayText, darkBlue)
+                                    DetailItem(
+                                        label = "IDADE",
+                                        value = animal?.idade ?: "",
+                                        modifier = Modifier.weight(1f),
+                                        grayText,
+                                        darkBlue
+                                    )
+                                    DetailItem(
+                                        label = "SEXO",
+                                        value = animal?.sexo ?: "",
+                                        modifier = Modifier.weight(1f),
+                                        grayText,
+                                        darkBlue
+                                    )
                                 }
                                 Spacer(modifier = Modifier.height(16.dp))
                                 Row(modifier = Modifier.fillMaxWidth()) {
-                                    DetailItem(label = "PORTE", value = animal?.porte ?: "", modifier = Modifier.weight(1f), grayText = grayText, valueColor = darkBlue)
-                                    DetailItem(label = "COMPORTAMENTO", value = animal?.comportamento ?: "N/A", modifier = Modifier.weight(1f), grayText = grayText, valueColor = darkBlue)
+                                    DetailItem(
+                                        label = "PORTE",
+                                        value = animal?.porte ?: "",
+                                        modifier = Modifier.weight(1f),
+                                        grayText = grayText,
+                                        valueColor = darkBlue
+                                    )
+                                    DetailItem(
+                                        label = "COMPORTAMENTO",
+                                        value = animal?.comportamento ?: "N/A",
+                                        modifier = Modifier.weight(1f),
+                                        grayText = grayText,
+                                        valueColor = darkBlue
+                                    )
                                 }
-                                
+
                                 Spacer(modifier = Modifier.height(24.dp))
 
                                 Surface(
@@ -252,32 +301,47 @@ fun AnimalProfileScreen(
                                             )
                                             Row(
                                                 verticalAlignment = Alignment.CenterVertically,
-                                                modifier = Modifier.clickable { 
+                                                modifier = Modifier.clickable {
                                                     if (!isGenerating && animal != null) {
                                                         isGenerating = true
-                                                        
+
                                                         movementRepository.listMovements(animalId) { movements ->
-                                                            medicalRecordRepository.listRecords(animalId) { records ->
+                                                            medicalRecordRepository.listRecords(
+                                                                animalId
+                                                            ) { records ->
                                                                 scope.launch {
-                                                                    val result = aiRepository.generateDescription(
-                                                                        animal!!,
-                                                                        movements,
-                                                                        records
-                                                                    )
+                                                                    val result =
+                                                                        aiRepository.generateDescription(
+                                                                            animal!!,
+                                                                            movements,
+                                                                            records
+                                                                        )
                                                                     if (result != null) {
                                                                         aiDescription = result
                                                                         viewModel.atualizarDescricao(
                                                                             id = animalId,
                                                                             descricao = result,
                                                                             onSuccess = {
-                                                                                Toast.makeText(context, "Descrição salva!", Toast.LENGTH_SHORT).show()
+                                                                                Toast.makeText(
+                                                                                    context,
+                                                                                    "Descrição salva!",
+                                                                                    Toast.LENGTH_SHORT
+                                                                                ).show()
                                                                             },
                                                                             onFailure = { e ->
-                                                                                Toast.makeText(context, "Erro ao salvar: ${e.message}", Toast.LENGTH_SHORT).show()
+                                                                                Toast.makeText(
+                                                                                    context,
+                                                                                    "Erro ao salvar: ${e.message}",
+                                                                                    Toast.LENGTH_SHORT
+                                                                                ).show()
                                                                             }
                                                                         )
                                                                     } else {
-                                                                        Toast.makeText(context, "Erro ao gerar descrição", Toast.LENGTH_SHORT).show()
+                                                                        Toast.makeText(
+                                                                            context,
+                                                                            "Erro ao gerar descrição",
+                                                                            Toast.LENGTH_SHORT
+                                                                        ).show()
                                                                     }
                                                                     isGenerating = false
                                                                 }
@@ -329,7 +393,7 @@ fun AnimalProfileScreen(
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         Button(
-                            onClick = { 
+                            onClick = {
                                 navController.navigate(Routes.EditAnimal.createRoute(animalId))
                             },
                             modifier = Modifier
@@ -339,23 +403,39 @@ fun AnimalProfileScreen(
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF1F3F4))
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(Icons.Outlined.Edit, contentDescription = null, tint = darkBlue, modifier = Modifier.size(18.dp))
+                                Icon(
+                                    Icons.Outlined.Edit,
+                                    contentDescription = null,
+                                    tint = darkBlue,
+                                    modifier = Modifier.size(18.dp)
+                                )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text("Editar", color = darkBlue, fontWeight = FontWeight.Bold)
                             }
                         }
-                        Button(
-                            onClick = { showDeleteDialog = true },
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(50.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = deleteRed)
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(Icons.Outlined.Delete, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text("Excluir", color = Color.White, fontWeight = FontWeight.Bold)
+                        if (SessionManager.tipoUsuario?.uppercase() == "GESTOR") {
+                            Button(
+                                onClick = { showDeleteDialog = true },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(50.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = deleteRed)
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        Icons.Outlined.Delete,
+                                        contentDescription = null,
+                                        tint = Color.White,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        "Excluir",
+                                        color = Color.White,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
                             }
                         }
                     }
@@ -386,39 +466,43 @@ fun AnimalProfileScreen(
                 item {
                     var isExporting by remember { mutableStateOf(false) }
 
-                    ActionButton(
-                        text = if (isExporting) "Gerando PDF..." else "Exportar Prontuário PDF",
-                        icon = Icons.Default.PictureAsPdf,
-                        containerColor = Color(0xFFE91E63),
-                        onClick = {
-                            if (!isExporting && animal != null) {
-                                isExporting = true
-                                medicalRecordRepository.listRecords(animalId) { records ->
-                                    scope.launch {
-                                        var bitmap: android.graphics.Bitmap? = null
-                                        if (!animal?.fotoUrl.isNullOrEmpty()) {
-                                            val request = ImageRequest.Builder(context)
-                                                .data(animal?.fotoUrl)
-                                                .allowHardware(false)
-                                                .build()
-                                            val result = context.imageLoader.execute(request)
-                                            if (result is SuccessResult) {
-                                                bitmap = (result.drawable as? BitmapDrawable)?.bitmap
-                                            }
-                                        }
+                    if (SessionManager.tipoUsuario?.uppercase() == "GESTOR") {
 
-                                        PdfHelper.generateAndSharePdf(
-                                            context = context,
-                                            animal = animal!!,
-                                            records = records,
-                                            photo = bitmap
-                                        )
-                                        isExporting = false
+                        ActionButton(
+                            text = if (isExporting) "Gerando PDF..." else "Exportar Prontuário PDF",
+                            icon = Icons.Default.PictureAsPdf,
+                            containerColor = Color(0xFFE91E63),
+                            onClick = {
+                                if (!isExporting && animal != null) {
+                                    isExporting = true
+                                    medicalRecordRepository.listRecords(animalId) { records ->
+                                        scope.launch {
+                                            var bitmap: android.graphics.Bitmap? = null
+                                            if (!animal?.fotoUrl.isNullOrEmpty()) {
+                                                val request = ImageRequest.Builder(context)
+                                                    .data(animal?.fotoUrl)
+                                                    .allowHardware(false)
+                                                    .build()
+                                                val result = context.imageLoader.execute(request)
+                                                if (result is SuccessResult) {
+                                                    bitmap =
+                                                        (result.drawable as? BitmapDrawable)?.bitmap
+                                                }
+                                            }
+
+                                            PdfHelper.generateAndSharePdf(
+                                                context = context,
+                                                animal = animal!!,
+                                                records = records,
+                                                photo = bitmap
+                                            )
+                                            isExporting = false
+                                        }
                                     }
                                 }
                             }
-                        }
-                    )
+                        )
+                    }
                 }
             }
         }

@@ -44,4 +44,8 @@ class LoginViewModel : ViewModel() {
     fun definirErro(mensagem: String) {
         erroLogin = mensagem
     }
+
+    fun buscarTipoUsuario(onResult: (String?) -> Unit) {
+        AuthRepository().buscarTipoUsuario(onResult)
+    }
 }

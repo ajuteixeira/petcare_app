@@ -11,6 +11,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -23,6 +24,7 @@ import androidx.navigation.NavController
 import androidx.lifecycle.viewmodel.compose.viewModel
 import br.unifor.petcare__ong.ui.components.AppBottomBar
 import br.unifor.petcare__ong.ui.navigation.Routes
+import br.unifor.petcare__ong.ui.session.SessionManager
 import br.unifor.petcare__ong.ui.viewmodel.DashboardViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,6 +35,15 @@ fun DashboardScreen(navController: NavController, viewModel: DashboardViewModel 
     val tealPrimary = Color(0xFF009688)
     val grayText = Color(0xFF707B81)
     val backgroundGray = Color(0xFFF8F9FA)
+
+    if (SessionManager.tipoUsuario != "GESTOR") {
+        LaunchedEffect(Unit) {
+            navController.navigate(Routes.AnimalList.route) {
+                popUpTo(Routes.Dashboard.route) { inclusive = true }
+            }
+        }
+        return
+    }
 
     Scaffold(
         topBar = {
@@ -51,7 +62,8 @@ fun DashboardScreen(navController: NavController, viewModel: DashboardViewModel 
         bottomBar = {
             AppBottomBar(
                 navController = navController,
-                currentRoute = Routes.Dashboard.route
+                currentRoute = Routes.Dashboard.route,
+                tipoUsuario = SessionManager.tipoUsuario
             )
         },
         containerColor = backgroundGray
