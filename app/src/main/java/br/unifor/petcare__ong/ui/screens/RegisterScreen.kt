@@ -34,14 +34,12 @@ fun RegisterScreen(navController: NavController) {
     val context = LocalContext.current
     val viewModel: RegisterViewModel = viewModel()
 
-
     var nome by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var senha by remember { mutableStateOf("") }
     var confirmarSenha by remember { mutableStateOf("") }
     var tipoUsuario by remember { mutableStateOf("VOLUNTARIO") }
 
-    // Mesma paleta de cores da LoginScreen
     val backgroundGradient = Brush.verticalGradient(
         colors = listOf(Color(0xFFE0F7F9), Color(0xFFFFFFFF), Color(0xFFFFF9E3))
     )
@@ -88,7 +86,7 @@ fun RegisterScreen(navController: NavController) {
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         },
-        containerColor = Color.Transparent // Para mostrar o gradiente do Box
+        containerColor = Color.Transparent
     ) { paddingValues ->
         Box(
             modifier = Modifier
@@ -104,7 +102,6 @@ fun RegisterScreen(navController: NavController) {
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Card Principal
                 Card(
                     shape = RoundedCornerShape(28.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.9f)),
@@ -124,7 +121,6 @@ fun RegisterScreen(navController: NavController) {
 
                             )
 
-                        // Reutilização da estrutura de campo
                         RegistrationField(
                             label = "Nome Completo",
                             value = nome,

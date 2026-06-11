@@ -10,7 +10,7 @@ class AuthRepository {
 
     fun login(
         email: String,
-        senha: String,
+        senha: String,  //
         callback: (Boolean, String?) -> Unit
     ) {
 
@@ -56,14 +56,10 @@ class AuthRepository {
                     .child(uid)
                     .setValue(usuario)
                     .addOnSuccessListener {
-
                         callback(true, null)
-
                     }
                     .addOnFailureListener {
-
                         callback(false, it.message)
-
                     }
 
             } else {
@@ -91,14 +87,24 @@ class AuthRepository {
             .child("tipo")
             .get()
             .addOnSuccessListener {
-
                 callback(it.value?.toString())
-
             }
             .addOnFailureListener {
-
                 callback(null)
-
             }
+    }
+
+    fun redefinirSenha(
+        email: String,
+        callback: (Boolean, String?) -> Unit
+    ) {
+        auth.sendPasswordResetEmail(email.trim())
+            .addOnSuccessListener {
+                callback(true, null)
+            }
+            .addOnFailureListener {
+                callback(false, it.message)
+            }
+
     }
 }

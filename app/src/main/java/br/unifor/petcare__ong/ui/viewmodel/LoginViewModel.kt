@@ -8,6 +8,7 @@ import br.unifor.petcare__ong.data.AuthRepository
 
 class LoginViewModel : ViewModel() {
 
+
     var erroLogin by mutableStateOf<String?>(null)
         private set
 
@@ -47,5 +48,12 @@ class LoginViewModel : ViewModel() {
 
     fun buscarTipoUsuario(onResult: (String?) -> Unit) {
         AuthRepository().buscarTipoUsuario(onResult)
+    }
+
+    fun redefinirSenha(
+        email: String,
+        onResult: (Boolean, String?) -> Unit
+    ) {
+        AuthRepository().redefinirSenha(email, onResult)
     }
 }
