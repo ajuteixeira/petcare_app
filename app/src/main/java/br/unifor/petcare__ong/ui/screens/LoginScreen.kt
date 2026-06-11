@@ -59,14 +59,12 @@ fun LoginScreen(navController: NavController) {
                 .fillMaxHeight()
                 .padding(horizontal = 32.dp)
                 .verticalScroll(rememberScrollState())
-                .imePadding()
                 .align(Alignment.Center),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Spacer(modifier = Modifier.height(80.dp))
 
-            // Logotipo (Simulado com uma Box branca e ícone)
             Card(
                 shape = RoundedCornerShape(24.dp),
                 elevation = CardDefaults.cardElevation(4.dp),
@@ -77,13 +75,12 @@ fun LoginScreen(navController: NavController) {
                     contentAlignment = Alignment.Center,
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    Text(text = "🐾", fontSize = 40.sp) // Representação do ícone de patas
+                    Text(text = "🐾", fontSize = 40.sp)
                 }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Título
             Text(
                 text = "PetCare ONG",
                 fontSize = 24.sp,
@@ -98,7 +95,6 @@ fun LoginScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(48.dp))
 
-            // Card do Formulário
             Card(
                 shape = RoundedCornerShape(28.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.9f)),
@@ -109,7 +105,6 @@ fun LoginScreen(navController: NavController) {
                     modifier = Modifier.padding(24.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    // Campo E-mail
                     Column {
                         Text("E-mail", fontWeight = FontWeight.SemiBold, color = darkBlue, fontSize = 14.sp)
                         Spacer(modifier = Modifier.height(8.dp))
@@ -127,7 +122,6 @@ fun LoginScreen(navController: NavController) {
                         )
                     }
 
-                    // Campo Senha
                     Column {
                         Text("Senha", fontWeight = FontWeight.SemiBold, color = darkBlue, fontSize = 14.sp)
                         Spacer(modifier = Modifier.height(8.dp))
@@ -144,11 +138,51 @@ fun LoginScreen(navController: NavController) {
                                 unfocusedBorderColor = Color(0xFFE8ECF4)
                             )
                         )
+                        Text(
+                            text = "Esqueceu sua senha?",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+
+                                    if (email.isBlank()) {
+                                        Toast.makeText(
+                                            context,
+                                            "Digite seu e-mail primeiro",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                        return@clickable
+                                    }
+
+                                    viewModel.redefinirSenha(email) { sucesso, erro ->
+
+                                        if (sucesso) {
+
+                                            Toast.makeText(
+                                                context,
+                                                "E-mail de recuperação enviado",
+                                                Toast.LENGTH_LONG
+                                            ).show()
+
+                                        } else {
+
+                                            Toast.makeText(
+                                                context,
+                                                erro ?: "Erro ao enviar e-mail",
+                                                Toast.LENGTH_LONG
+                                            ).show()
+
+                                        }
+                                    }
+                                },
+
+                            textAlign = TextAlign.End,
+                            color = primaryTeal,
+                            fontSize = 14.sp
+                        )
                     }
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // Botão Entrar
                     Button(
                         onClick = {
 
