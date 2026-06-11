@@ -26,7 +26,6 @@ import br.unifor.petcare__ong.model.Animal
 import br.unifor.petcare__ong.ui.components.AppBottomBar
 import br.unifor.petcare__ong.ui.navigation.Routes
 import coil.compose.AsyncImage
-
 import androidx.lifecycle.viewmodel.compose.viewModel
 import br.unifor.petcare__ong.ui.session.SessionManager
 import br.unifor.petcare__ong.ui.viewmodel.AnimalViewModel

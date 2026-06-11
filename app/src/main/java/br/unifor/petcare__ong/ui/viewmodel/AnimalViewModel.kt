@@ -20,10 +20,15 @@ class AnimalViewModel(private val repository: AnimalRepository = AnimalRepositor
 
     fun listarAnimais() {
         _isLoading.value = true
-        repository.listarAnimais { list ->
-            _animais.value = list
-            _isLoading.value = false
-        }
+        repository.listarAnimais(
+            onDataChange = { list ->
+                _animais.value = list
+                _isLoading.value = false
+            },
+            onFailure = {
+                _isLoading.value = false
+            }
+        )
     }
 
     fun buscarAnimalPorId(id: String) {

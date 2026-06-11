@@ -8,15 +8,14 @@ import com.google.firebase.database.ValueEventListener
 
 class AnimalRepository {
 
-    private val database =
-        FirebaseDatabase.getInstance().reference.child("animais")
+    private val database = FirebaseDatabase.getInstance().reference.child("animais")
 
     fun salvarAnimal(
         animal: Animal,
         onSuccess: () -> Unit,
         onFailure: (Exception) -> Unit
     ) {
-        val id = database.push().key ?: return
+        val id = database.push().key ?: return 
         val novoAnimal = animal.copy(id = id)
 
         database.child(id)
@@ -25,7 +24,10 @@ class AnimalRepository {
             .addOnFailureListener { onFailure(it) }
     }
 
-    fun listarAnimais(onDataChange: (List<Animal>) -> Unit) {
+    fun listarAnimais(
+        onDataChange: (List<Animal>) -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
         database.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val animais = mutableListOf<Animal>()
@@ -38,7 +40,9 @@ class AnimalRepository {
                 onDataChange(animais)
             }
 
-            override fun onCancelled(error: DatabaseError) {}
+            override fun onCancelled(error: DatabaseError) {
+                onFailure(error.toException()) 
+            }
         })
     }
 
@@ -60,7 +64,7 @@ class AnimalRepository {
         onSuccess: () -> Unit,
         onFailure: (Exception) -> Unit
     ) {
-        if (animal.id.isEmpty()) return
+        if (animal.id.isEmpty()) return 
         
         val animalValues = mapOf(
             "nome" to animal.nome,

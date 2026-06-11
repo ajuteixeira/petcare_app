@@ -40,7 +40,6 @@ import coil.imageLoader
 import coil.request.ImageRequest
 import coil.request.SuccessResult
 import kotlinx.coroutines.launch
-
 import androidx.lifecycle.viewmodel.compose.viewModel
 import br.unifor.petcare__ong.ui.session.SessionManager
 import br.unifor.petcare__ong.ui.viewmodel.AnimalViewModel
@@ -93,16 +92,11 @@ fun AnimalProfileScreen(
                         viewModel.deletarAnimal(
                             id = animalId,
                             onSuccess = {
-                                Toast.makeText(context, "Animal excluído!", Toast.LENGTH_SHORT)
-                                    .show()
+                                Toast.makeText(context, "Animal excluído!", Toast.LENGTH_SHORT).show()
                                 navController.popBackStack()
                             },
                             onFailure = { e ->
-                                Toast.makeText(
-                                    context,
-                                    "Erro ao excluir: ${e.message}",
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                                Toast.makeText(context, "Erro ao excluir: ${e.message}", Toast.LENGTH_SHORT).show()
                             }
                         )
                     },
@@ -131,14 +125,8 @@ fun AnimalProfileScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = {
-                        navController.navigateUp()
-                    }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Voltar",
-                            tint = darkBlue
-                        )
+                    IconButton(onClick = { navController.navigateUp() }) {
+                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Voltar", tint = darkBlue)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
@@ -188,30 +176,17 @@ fun AnimalProfileScreen(
                                         modifier = Modifier.fillMaxSize(),
                                         contentScale = ContentScale.Crop,
                                         colorFilter = if (animal?.status == "Falecido") {
-                                            ColorFilter.colorMatrix(ColorMatrix().apply {
-                                                setToSaturation(
-                                                    0f
-                                                )
-                                            })
+                                            ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) })
                                         } else null
                                     )
                                 } else {
-                                    Icon(
-                                        imageVector = Icons.Default.Pets,
-                                        contentDescription = null,
-                                        tint = Color.White.copy(alpha = 0.5f),
-                                        modifier = Modifier.size(80.dp)
-                                    )
+                                    Icon(imageVector = Icons.Default.Pets, contentDescription = null, tint = Color.White.copy(alpha = 0.5f), modifier = Modifier.size(80.dp))
                                 }
                             }
 
                             Column(modifier = Modifier.padding(20.dp)) {
-                                Text(
-                                    text = animal?.nome ?: "",
-                                    fontSize = 28.sp,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    color = darkBlue
-                                )
+                                Text(text = animal?.nome ?: "", fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, color = darkBlue)
+                                
                                 Surface(
                                     color = tealPrimary.copy(alpha = 0.1f),
                                     shape = RoundedCornerShape(8.dp),
@@ -219,10 +194,7 @@ fun AnimalProfileScreen(
                                 ) {
                                     Text(
                                         text = animal?.status?.uppercase() ?: "",
-                                        modifier = Modifier.padding(
-                                            horizontal = 8.dp,
-                                            vertical = 4.dp
-                                        ),
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                                         fontSize = 10.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = tealPrimary
@@ -230,56 +202,20 @@ fun AnimalProfileScreen(
                                 }
 
                                 Row(modifier = Modifier.fillMaxWidth()) {
-                                    DetailItem(
-                                        label = "ESPÉCIE",
-                                        value = animal?.especie ?: "",
-                                        modifier = Modifier.weight(1f),
-                                        grayText,
-                                        darkBlue
-                                    )
-                                    DetailItem(
-                                        label = "RAÇA",
-                                        value = animal?.raca ?: "",
-                                        modifier = Modifier.weight(1f),
-                                        grayText,
-                                        darkBlue
-                                    )
+                                    DetailItem(label = "ESPÉCIE", value = animal?.especie ?: "", modifier = Modifier.weight(1f), grayText, darkBlue)
+                                    DetailItem(label = "RAÇA", value = animal?.raca ?: "", modifier = Modifier.weight(1f), grayText, darkBlue)
                                 }
                                 Spacer(modifier = Modifier.height(16.dp))
                                 Row(modifier = Modifier.fillMaxWidth()) {
-                                    DetailItem(
-                                        label = "IDADE",
-                                        value = animal?.idade ?: "",
-                                        modifier = Modifier.weight(1f),
-                                        grayText,
-                                        darkBlue
-                                    )
-                                    DetailItem(
-                                        label = "SEXO",
-                                        value = animal?.sexo ?: "",
-                                        modifier = Modifier.weight(1f),
-                                        grayText,
-                                        darkBlue
-                                    )
+                                    DetailItem(label = "IDADE", value = animal?.idade ?: "", modifier = Modifier.weight(1f), grayText, darkBlue)
+                                    DetailItem(label = "SEXO", value = animal?.sexo ?: "", modifier = Modifier.weight(1f), grayText, darkBlue)
                                 }
                                 Spacer(modifier = Modifier.height(16.dp))
                                 Row(modifier = Modifier.fillMaxWidth()) {
-                                    DetailItem(
-                                        label = "PORTE",
-                                        value = animal?.porte ?: "",
-                                        modifier = Modifier.weight(1f),
-                                        grayText = grayText,
-                                        valueColor = darkBlue
-                                    )
-                                    DetailItem(
-                                        label = "COMPORTAMENTO",
-                                        value = animal?.comportamento ?: "N/A",
-                                        modifier = Modifier.weight(1f),
-                                        grayText = grayText,
-                                        valueColor = darkBlue
-                                    )
+                                    DetailItem(label = "PORTE", value = animal?.porte ?: "", modifier = Modifier.weight(1f), grayText = grayText, valueColor = darkBlue)
+                                    DetailItem(label = "COMPORTAMENTO", value = animal?.comportamento ?: "N/A", modifier = Modifier.weight(1f), grayText = grayText, valueColor = darkBlue)
                                 }
-
+                                
                                 Spacer(modifier = Modifier.height(24.dp))
 
                                 Surface(
@@ -293,55 +229,27 @@ fun AnimalProfileScreen(
                                             horizontalArrangement = Arrangement.SpaceBetween,
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
-                                            Text(
-                                                text = "DESCRIÇÃO",
-                                                fontSize = 10.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                color = Color(0xFFB0B0B0)
-                                            )
+                                            Text(text = "DESCRIÇÃO", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFFB0B0B0))
+                                            
                                             Row(
                                                 verticalAlignment = Alignment.CenterVertically,
-                                                modifier = Modifier.clickable {
+                                                modifier = Modifier.clickable { 
                                                     if (!isGenerating && animal != null) {
                                                         isGenerating = true
-
                                                         movementRepository.listMovements(animalId) { movements ->
-                                                            medicalRecordRepository.listRecords(
-                                                                animalId
-                                                            ) { records ->
+                                                            medicalRecordRepository.listRecords(animalId) { records ->
                                                                 scope.launch {
-                                                                    val result =
-                                                                        aiRepository.generateDescription(
-                                                                            animal!!,
-                                                                            movements,
-                                                                            records
-                                                                        )
+                                                                    val result = aiRepository.generateDescription(animal!!, movements, records)
                                                                     if (result != null) {
                                                                         aiDescription = result
                                                                         viewModel.atualizarDescricao(
                                                                             id = animalId,
                                                                             descricao = result,
-                                                                            onSuccess = {
-                                                                                Toast.makeText(
-                                                                                    context,
-                                                                                    "Descrição salva!",
-                                                                                    Toast.LENGTH_SHORT
-                                                                                ).show()
-                                                                            },
-                                                                            onFailure = { e ->
-                                                                                Toast.makeText(
-                                                                                    context,
-                                                                                    "Erro ao salvar: ${e.message}",
-                                                                                    Toast.LENGTH_SHORT
-                                                                                ).show()
-                                                                            }
+                                                                            onSuccess = { Toast.makeText(context, "Descrição salva!", Toast.LENGTH_SHORT).show() },
+                                                                            onFailure = { e -> Toast.makeText(context, "Erro ao salvar: ${e.message}", Toast.LENGTH_SHORT).show() }
                                                                         )
                                                                     } else {
-                                                                        Toast.makeText(
-                                                                            context,
-                                                                            "Erro ao gerar descrição",
-                                                                            Toast.LENGTH_SHORT
-                                                                        ).show()
+                                                                        Toast.makeText(context, "Erro ao gerar descrição", Toast.LENGTH_SHORT).show()
                                                                     }
                                                                     isGenerating = false
                                                                 }
@@ -351,26 +259,12 @@ fun AnimalProfileScreen(
                                                 }
                                             ) {
                                                 if (isGenerating) {
-                                                    CircularProgressIndicator(
-                                                        modifier = Modifier.size(16.dp),
-                                                        strokeWidth = 2.dp,
-                                                        color = tealPrimary
-                                                    )
+                                                    CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp, color = tealPrimary)
                                                 } else {
-                                                    Icon(
-                                                        imageVector = Icons.Default.AutoAwesome,
-                                                        contentDescription = null,
-                                                        tint = tealPrimary,
-                                                        modifier = Modifier.size(16.dp)
-                                                    )
+                                                    Icon(imageVector = Icons.Default.AutoAwesome, contentDescription = null, tint = tealPrimary, modifier = Modifier.size(16.dp))
                                                 }
                                                 Spacer(modifier = Modifier.width(4.dp))
-                                                Text(
-                                                    text = "Gerar com IA",
-                                                    fontSize = 12.sp,
-                                                    fontWeight = FontWeight.Bold,
-                                                    color = tealPrimary
-                                                )
+                                                Text(text = "Gerar com IA", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = tealPrimary)
                                             }
                                         }
                                         Spacer(modifier = Modifier.height(8.dp))
@@ -393,22 +287,13 @@ fun AnimalProfileScreen(
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         Button(
-                            onClick = {
-                                navController.navigate(Routes.EditAnimal.createRoute(animalId))
-                            },
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(50.dp),
+                            onClick = { navController.navigate(Routes.EditAnimal.createRoute(animalId)) },
+                            modifier = Modifier.weight(1f).height(50.dp),
                             shape = RoundedCornerShape(12.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF1F3F4))
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    Icons.Outlined.Edit,
-                                    contentDescription = null,
-                                    tint = darkBlue,
-                                    modifier = Modifier.size(18.dp)
-                                )
+                                Icon(Icons.Outlined.Edit, contentDescription = null, tint = darkBlue, modifier = Modifier.size(18.dp))
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text("Editar", color = darkBlue, fontWeight = FontWeight.Bold)
                             }
@@ -416,25 +301,14 @@ fun AnimalProfileScreen(
                         if (SessionManager.tipoUsuario?.uppercase() == "GESTOR") {
                             Button(
                                 onClick = { showDeleteDialog = true },
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(50.dp),
+                                modifier = Modifier.weight(1f).height(50.dp),
                                 shape = RoundedCornerShape(12.dp),
                                 colors = ButtonDefaults.buttonColors(containerColor = deleteRed)
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        Icons.Outlined.Delete,
-                                        contentDescription = null,
-                                        tint = Color.White,
-                                        modifier = Modifier.size(18.dp)
-                                    )
+                                    Icon(Icons.Outlined.Delete, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
                                     Spacer(modifier = Modifier.width(8.dp))
-                                    Text(
-                                        "Excluir",
-                                        color = Color.White,
-                                        fontWeight = FontWeight.Bold
-                                    )
+                                    Text("Excluir", color = Color.White, fontWeight = FontWeight.Bold)
                                 }
                             }
                         }
@@ -446,9 +320,7 @@ fun AnimalProfileScreen(
                         text = "Prontuário Médico",
                         icon = Icons.Default.Timeline,
                         containerColor = tealPrimary,
-                        onClick = {
-                            navController.navigate(Routes.MedicalRecord.createRoute(animalId))
-                        }
+                        onClick = { navController.navigate(Routes.MedicalRecord.createRoute(animalId)) }
                     )
                 }
 
@@ -457,17 +329,13 @@ fun AnimalProfileScreen(
                         text = "Histórico de Movimentações",
                         icon = Icons.Default.Map,
                         containerColor = tealPrimary,
-                        onClick = {
-                            navController.navigate(Routes.MovementHistory.createRoute(animalId))
-                        }
+                        onClick = { navController.navigate(Routes.MovementHistory.createRoute(animalId)) }
                     )
                 }
 
                 item {
                     var isExporting by remember { mutableStateOf(false) }
-
                     if (SessionManager.tipoUsuario?.uppercase() == "GESTOR") {
-
                         ActionButton(
                             text = if (isExporting) "Gerando PDF..." else "Exportar Prontuário PDF",
                             icon = Icons.Default.PictureAsPdf,
@@ -479,23 +347,13 @@ fun AnimalProfileScreen(
                                         scope.launch {
                                             var bitmap: android.graphics.Bitmap? = null
                                             if (!animal?.fotoUrl.isNullOrEmpty()) {
-                                                val request = ImageRequest.Builder(context)
-                                                    .data(animal?.fotoUrl)
-                                                    .allowHardware(false)
-                                                    .build()
+                                                val request = ImageRequest.Builder(context).data(animal?.fotoUrl).allowHardware(false).build()
                                                 val result = context.imageLoader.execute(request)
                                                 if (result is SuccessResult) {
-                                                    bitmap =
-                                                        (result.drawable as? BitmapDrawable)?.bitmap
+                                                    bitmap = (result.drawable as? BitmapDrawable)?.bitmap
                                                 }
                                             }
-
-                                            PdfHelper.generateAndSharePdf(
-                                                context = context,
-                                                animal = animal!!,
-                                                records = records,
-                                                photo = bitmap
-                                            )
+                                            PdfHelper.generateAndSharePdf(context, animal!!, records, bitmap)
                                             isExporting = false
                                         }
                                     }
@@ -510,13 +368,7 @@ fun AnimalProfileScreen(
 }
 
 @Composable
-fun DetailItem(
-    label: String,
-    value: String,
-    modifier: Modifier = Modifier,
-    grayText: Color,
-    valueColor: Color
-) {
+fun DetailItem(label: String, value: String, modifier: Modifier = Modifier, grayText: Color, valueColor: Color) {
     Column(modifier = modifier) {
         Text(text = label, fontSize = 10.sp, color = grayText, fontWeight = FontWeight.Medium)
         Spacer(modifier = Modifier.height(4.dp))
@@ -525,25 +377,15 @@ fun DetailItem(
 }
 
 @Composable
-fun ActionButton(
-    text: String,
-    icon: ImageVector,
-    containerColor: Color,
-    onClick: () -> Unit
-) {
+fun ActionButton(text: String, icon: ImageVector, containerColor: Color, onClick: () -> Unit) {
     Button(
         onClick = onClick,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp),
+        modifier = Modifier.fillMaxWidth().height(56.dp),
         shape = RoundedCornerShape(12.dp),
         colors = ButtonDefaults.buttonColors(containerColor = containerColor),
         contentPadding = PaddingValues(horizontal = 16.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(24.dp))
             Spacer(modifier = Modifier.width(12.dp))
             Text(text = text, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
