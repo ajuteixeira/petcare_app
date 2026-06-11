@@ -121,16 +121,16 @@ fun ExportReportsScreen(navController: NavController, viewModel: ExportViewModel
             )
 
             Button(
-                onClick = { viewModel.exportToCsv(context) },
+                onClick = { viewModel.exportToPdf(context) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = tealPrimary)
             ) {
-                Icon(Icons.Default.Share, contentDescription = null)
+                Icon(Icons.Default.PictureAsPdf, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Gerar e Compartilhar CSV", fontWeight = FontWeight.Bold)
+                Text("Gerar e Compartilhar PDF", fontWeight = FontWeight.Bold)
             }
 
             Spacer(modifier = Modifier.height(16.dp))

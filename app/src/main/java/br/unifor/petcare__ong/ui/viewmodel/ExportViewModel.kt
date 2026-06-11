@@ -8,8 +8,16 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModel
 import br.unifor.petcare__ong.data.AnimalRepository
 import br.unifor.petcare__ong.model.Animal
+import com.itextpdf.kernel.colors.ColorConstants
+import com.itextpdf.kernel.pdf.PdfDocument
+import com.itextpdf.kernel.pdf.PdfWriter
+import com.itextpdf.layout.Document
+import com.itextpdf.layout.element.Cell
+import com.itextpdf.layout.element.Paragraph
+import com.itextpdf.layout.element.Table
+import com.itextpdf.layout.properties.TextAlignment
+import com.itextpdf.layout.properties.UnitValue
 import java.io.File
-import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -53,27 +61,51 @@ class ExportViewModel : ViewModel() {
         _state.value = _state.value.copy(startDate = start, endDate = end)
     }
 
-    fun exportToCsv(context: Context) {
+    fun exportToPdf(context: Context) {
         val currentState = _state.value
         val filteredList = when (currentState.selectedType) {
             ReportType.FULL_LIST -> currentState.animals
             ReportType.AVAILABLE -> currentState.animals.filter { it.status.equals("Disponível", ignoreCase = true) }
-            else -> currentState.animals // Simplified for now
-        }
-
-        val csvHeader = "Nome,Especie,Raca,Idade,Sexo,Status,Descricao\n"
-        val csvContent = StringBuilder(csvHeader)
-        
-        filteredList.forEach { animal ->
-            csvContent.append("${animal.nome},${animal.especie},${animal.raca},${animal.idade},${animal.sexo},${animal.status},${animal.descricao}\n")
+            else -> currentState.animals
         }
 
         try {
-            val fileName = "relatorio_${currentState.selectedType.name.lowercase()}_${SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())}.csv"
+            val fileName = "relatorio_${currentState.selectedType.name.lowercase()}_${SimpleDateFormat("yyyyMMdd_HHmm", Locale.getDefault()).format(Date())}.pdf"
             val file = File(context.cacheDir, fileName)
-            FileOutputStream(file).use { 
-                it.write(csvContent.toString().toByteArray())
+            
+            val pdfWriter = PdfWriter(file)
+            val pdfDocument = PdfDocument(pdfWriter)
+            val document = Document(pdfDocument)
+
+            // Title
+            document.add(Paragraph("PETCARE ONG").setBold().setFontSize(20f).setTextAlignment(TextAlignment.CENTER))
+            document.add(Paragraph("Relatório: ${currentState.selectedType.label}").setFontSize(14f).setTextAlignment(TextAlignment.CENTER))
+            document.add(Paragraph("Gerado em: ${SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date())}").setFontSize(10f).setTextAlignment(TextAlignment.CENTER))
+            document.add(Paragraph("\n"))
+
+            // Table
+            val table = Table(UnitValue.createPercentArray(floatArrayOf(3f, 2f, 2f, 1f, 2f)))
+            table.width = UnitValue.createPercentValue(100f)
+
+            // Headers
+            val headers = listOf("Nome", "Espécie", "Raça", "Idade", "Status")
+            headers.forEach { header ->
+                table.addHeaderCell(Cell().add(Paragraph(header).setBold()).setBackgroundColor(ColorConstants.LIGHT_GRAY))
             }
+
+            // Data
+            filteredList.forEach { animal ->
+                table.addCell(Cell().add(Paragraph(animal.nome)))
+                table.addCell(Cell().add(Paragraph(animal.especie)))
+                table.addCell(Cell().add(Paragraph(animal.raca)))
+                table.addCell(Cell().add(Paragraph(animal.idade)))
+                table.addCell(Cell().add(Paragraph(animal.status)))
+            }
+
+            document.add(table)
+            document.add(Paragraph("\nTotal de registros: ${filteredList.size}").setBold())
+            
+            document.close()
 
             val uri = FileProvider.getUriForFile(
                 context,
@@ -82,12 +114,13 @@ class ExportViewModel : ViewModel() {
             )
 
             val intent = Intent(Intent.ACTION_SEND).apply {
-                type = "text/csv"
-                putExtra(Intent.EXTRA_SUBJECT, "Relatório PetCare ONG")
+                type = "application/pdf"
+                putExtra(Intent.EXTRA_SUBJECT, "Relatório PetCare ONG - PDF")
                 putExtra(Intent.EXTRA_STREAM, uri)
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
-            context.startActivity(Intent.createChooser(intent, "Exportar Relatório"))
+            context.startActivity(Intent.createChooser(intent, "Exportar Relatório PDF"))
+
         } catch (e: Exception) {
             e.printStackTrace()
         }
